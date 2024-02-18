@@ -50,7 +50,7 @@ cc_library(
         ],
     ),
     deps = [
-    "@robin_map",
-    "@rules_python//python/cc:current_py_cc_headers"
+        "@robin_map",
+        "@rules_python//python/cc:current_py_cc_headers",
     ],
 )
