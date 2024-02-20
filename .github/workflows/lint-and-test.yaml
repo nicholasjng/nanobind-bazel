@@ -1,4 +1,4 @@
-name: Lint and test nnbench
+name: Lint and test nanobind-bazel
 
 on:
   push:
@@ -27,8 +27,7 @@ jobs:
       - name: Cache pre-commit tools
         uses: actions/cache@v4
         with:
-          path: |
-            ${{ env.PRE_COMMIT_HOME }}
+          path: ${{ env.PRE_COMMIT_HOME }}
           key: ${{ hashFiles('.pre-commit-config.yaml') }}-linter-cache
       - name: Run pre-commit checks
         run: pre-commit run --all-files --verbose --show-diff-on-failure
@@ -55,7 +54,7 @@ jobs:
         path: nanobind_example
         ref: bazel
 
-    - name: Build and test nanobind example on ${{ matrix.os }}
+    - name: Build and test nanobind_example on ${{ matrix.os }}
       run: |
         python -m pip wheel . -w dist
         python -m pip install --find-links=dist/ nanobind_example
