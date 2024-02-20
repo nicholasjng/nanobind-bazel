@@ -1,8 +1,8 @@
-# nanobind-bazel: Bazel defs for C++ bindings for Python with nanobind
+# nanobind-bazel: Bazel build rules for C++ Python bindings with nanobind
 
 This repo contains Bazel build defs for Python bindings created with [nanobind](https://github.com/wjakob/nanobind).
 
-The full list of exported rules:
+Here's the full list of exported rules:
 
 - `nanobind_extension`, building a Python extension containing the bindings as a `*.so` file.
 These extensions can be used e.g. as a `data` dependency for a `py_library` target.
@@ -13,13 +13,12 @@ Each target is given nanobind's specific build flags, optimizations and dependen
 
 ## Usage with bzlmod
 
-This repo is not yet pushed to the Bazel Central Registry (BCR). To use it, you can specify it with e.g. an `archive_override`:
+This repo is not yet pushed to the Bazel Central Registry (BCR). To use it, you can specify it with e.g. a `local_path_override`:
 
 ```
-archive_override("nanobind_bazel", urls = ["https://github.com/nicholasjng/nanobind-bazel/archive/v1.8.0.zip"])
+bazel_dep(name = "nanobind_bazel", version = "")
+local_path_override(module_name = "nanobind_bazel", path = "/path/to/nanobind-bazel")
 ```
-
-⚠️This is not yet tested.
 
 A BCR release is planned pending more exhaustive testing and validation.
 
@@ -32,12 +31,12 @@ In contrast to that project, though, nanobind does not support Python interprete
 
 ## Roadmap
 
-- [ ] First successful test, e.g. on wjakob's [nanobind example](https://github.com/wjakob/nanobind_example).
+- [x] First successful test, e.g. on wjakob's [nanobind example](https://github.com/wjakob/nanobind_example).
 - [ ] A BCR release, with a GitHub Actions job automating subsequent releases (optional).
 - [ ] Supporting local mode or git SHAs to pull nanobind from.
 
 ## Contributing
 
-I welcome all contributions. 
+I welcome all contributions.
 If you encounter problems using these rules in your Bazel setup, please open an issue.
 If you'd like to help maintain the project, write me a message.
