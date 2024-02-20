@@ -1,0 +1,63 @@
+name: Lint and test nnbench
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  buildifier:
+    name: Lint Bazel files with buildifier
+    runs-on: ubuntu-latest
+    env:
+      PRE_COMMIT_HOME: "${{ github.workspace }}/.cache/pre-commit"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Python and dependencies
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+      - name: Install pre-commit
+        run: pip install --upgrade pre-commit
+      - name: Cache pre-commit tools
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.PRE_COMMIT_HOME }}
+          key: ${{ hashFiles('.pre-commit-config.yaml') }}-linter-cache
+      - name: Run pre-commit checks
+        run: pre-commit run --all-files --verbose --show-diff-on-failure
+  test:
+    name: Test nanobind_example on ${{ matrix.os }} w/ Python ${{ matrix.py }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+        py: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        path: nanobind-bazel
+    - name: Set up Python ${{ matrix.py }} on ${{ matrix.os }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.py }}
+    - name: Check out nanobind example repo
+      uses: actions/checkout@v4
+      with:
+        repository: wjakob/nanobind_example
+        path: nanobind_example
+        ref: bazel
+
+    - name: Build and test nanobind example on ${{ matrix.os }}
+      run: |
+        python -m pip wheel . -w dist
+        python -m pip install --find-links=dist/ nanobind_example
+        python -c "import nanobind_example; assert nanobind_example.add(1, 2) == 3"
+      working-directory: ${{ github.workspace }}/nanobind_example
