@@ -11,7 +11,7 @@ which can then be included e.g. as a `data` input in a ``native.py_library``.
 """
 
 NANOBIND_COPTS = select({
-    Label("@nanobind//:msvc_compiler"): [],
+    Label("@nanobind//:msvc"): [],
     "//conditions:default": ["-fexceptions", "-fvisibility=hidden"],
 })
 
@@ -27,8 +27,7 @@ NANOBIND_DEPS = [
 
 def nanobind_extension(
         name,
-        srcs,
-        hdrs = [],
+        srcs = [],
         copts = [],
         features = [],
         deps = [],
@@ -36,7 +35,6 @@ def nanobind_extension(
     native.cc_binary(
         name = name + ".so",
         srcs = srcs,
-        hdrs = hdrs,
         copts = copts + NANOBIND_COPTS,
         features = features + NANOBIND_FEATURES,
         deps = deps + NANOBIND_DEPS,
@@ -67,8 +65,8 @@ def nanobind_test(
         **kwargs):
     native.cc_test(
         name = name,
-        copts = copts + PYBIND_COPTS,
-        features = features + PYBIND_FEATURES,
-        deps = deps + PYBIND_DEPS,
+        copts = copts + NANOBIND_COPTS,
+        features = features + NANOBIND_FEATURES,
+        deps = deps + NANOBIND_DEPS,
         **kwargs
     )
