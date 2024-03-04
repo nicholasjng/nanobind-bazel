@@ -13,7 +13,7 @@ which can then be included e.g. as a `data` input in a ``native.py_library``.
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 
 NANOBIND_COPTS = select({
-    Label("@nanobind//:msvc"): [],
+    Label("@rules_cc//cc/compiler:msvc-cl"): [],
     "//conditions:default": ["-fexceptions", "-fvisibility=hidden"],
 })
 
