@@ -10,6 +10,8 @@ built using the C++ source files containing the nanobind module definition,
 which can then be included e.g. as a `data` input in a ``native.py_library``.
 """
 
+load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
+
 NANOBIND_COPTS = select({
     Label("@nanobind//:msvc"): [],
     "//conditions:default": ["-fexceptions", "-fvisibility=hidden"],
@@ -25,6 +27,12 @@ NANOBIND_DEPS = [
     "@rules_python//python/cc:current_py_cc_headers",
 ]
 
+# A C++ Python extension library built with nanobind.
+# Given a name $NAME, defines the following targets:
+# 1. $NAME.so, a shared object library for use on Linux/Mac.
+# 2. $NAME.pyd, a copy of $NAME.so for use on Windows.
+# 3. $NAME, an alias pointing to the appropriate library
+#    depending on the target platform.
 def nanobind_extension(
         name,
         srcs = [],
@@ -32,6 +40,7 @@ def nanobind_extension(
         features = [],
         deps = [],
         **kwargs):
+    # TODO: This might need a different suffix depending on SABI yes/no.
     native.cc_binary(
         name = name + ".so",
         srcs = srcs,
@@ -41,6 +50,20 @@ def nanobind_extension(
         linkshared = True,
         linkstatic = True,
         **kwargs
+    )
+
+    copy_file(
+        name = name + "_copy_so_to_pyd",
+        src = name + ".so",
+        out = name + ".pyd",
+    )
+
+    native.alias(
+        name = name,
+        actual = select({
+            "@platforms//os:windows": name + ".pyd",
+            "//conditions:default": name + ".so",
+        }),
     )
 
 def nanobind_library(
