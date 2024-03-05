@@ -45,6 +45,42 @@ config_setting(
     flag_values = {":py-limited-api": "unset"},
 )
 
+selects.config_setting_group(
+    name = "unix",
+    match_any = [
+        "@platforms//os:linux",
+        "@platforms//os:macos",
+    ],
+)
+
+# Config setting indicating that stable ABI extension build was requested.
+selects.config_setting_group(
+    name = "stable-abi",
+    match_any = [
+        ":cp312",
+        ":cp313",
+    ],
+)
+
+# A stable ABI build on Linux or Mac.
+# This requires a different extension name (.abi3.so instead of just .so).
+selects.config_setting_group(
+    name = "stable-abi-unix",
+    match_all = [
+        ":stable-abi",
+        ":unix",
+    ],
+)
+
+# An unlimited Python ABI build on Linux or Mac. Produces a regular .so file.
+selects.config_setting_group(
+    name = "unstable-abi-unix",
+    match_all = [
+        ":pyunlimitedapi",
+        ":unix",
+    ],
+)
+
 # Is the currently configured C++ compiler not MSVC?
 selects.config_setting_group(
     name = "nonmsvc",
