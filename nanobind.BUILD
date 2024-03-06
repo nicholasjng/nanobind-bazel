@@ -1,8 +1,8 @@
 """
-A cross-platform nanobind Bazel BUILD.
+A cross-platform nanobind Bazel build.
 Supports size and linker optimizations across all three major operating systems.
-Size optimizations used: -Os, LTO
-Linker optimizations used: LTCG (MSVC on Windows), linker response file (macOS only).
+Size optimizations used: -Os, LTO.
+Linker optimizations used: LTO (clang, gcc) / LTCG (MSVC), linker response file (macOS only).
 """
 
 load("@nanobind_bazel//:helpers.bzl", "pyversionhex", "sizedefs", "sizeopts")
@@ -31,18 +31,47 @@ cc_library(
         ],
     }) + sizeopts(),
     defines = pyversionhex(),
-    includes = [
-        "ext/robin_map/include",
-        "include",
-    ],
+    includes = ["include"],
     linkopts = select({
         "@rules_cc//cc/compiler:msvc-cl": ["/LTCG"],  # MSVC.
         "@platforms//os:macos": [
             "-Wl,@$(location :cmake/darwin-ld-cpython.sym)",  # Apple.
-            "-Wl,-dead_strip",
         ],
         "//conditions:default": [],
     }),
+    local_defines = sizedefs(),  # sizeopts apply to nanobind only.
+    textual_hdrs = glob(
+        [
+            "include/**/*.h",
+            "src/*.h",
+        ],
+    ),
+    deps = [
+        "@robin_map",
+        "@rules_python//python/cc:current_py_cc_headers",
+    ],
+)
+
+cc_library(
+    name = "libnanobind",
+    copts = select({
+        "@platforms//os:linux": [
+            "-ffunction-sections",
+            "-fdata-sections",
+            "-fno-strict-aliasing",
+        ],
+        "//conditions:default": [],
+    }),
+    defines = pyversionhex(),
+    linkopts = select({
+        "@platforms//os:linux": [
+            "--Wl,--gc-sections",
+        ],
+        "@platforms//os:macos": [
+            "-Wl,-dead_strip",
+        ],
+    }),
+    linkstatic = True,
     local_defines = sizedefs(),  # sizeopts apply to nanobind only.
     textual_hdrs = glob(
         [
