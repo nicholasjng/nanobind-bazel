@@ -11,9 +11,10 @@ which can then be included e.g. as a `data` input in a ``native.py_library``.
 """
 
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
+load("@nanobind_bazel//:helpers.bzl", "extension_name")
 
 NANOBIND_COPTS = select({
-    Label("@nanobind//:msvc"): [],
+    Label("@rules_cc//cc/compiler:msvc-cl"): [],
     "//conditions:default": ["-fexceptions", "-fvisibility=hidden"],
 })
 
@@ -40,7 +41,6 @@ def nanobind_extension(
         features = [],
         deps = [],
         **kwargs):
-    # TODO: This might need a different suffix depending on SABI yes/no.
     native.cc_binary(
         name = name + ".so",
         srcs = srcs,
@@ -53,6 +53,12 @@ def nanobind_extension(
     )
 
     copy_file(
+        name = name + "_copy_so_to_abi3_so",
+        src = name + ".so",
+        out = name + ".abi3.so",
+    )
+
+    copy_file(
         name = name + "_copy_so_to_pyd",
         src = name + ".so",
         out = name + ".pyd",
@@ -60,10 +66,7 @@ def nanobind_extension(
 
     native.alias(
         name = name,
-        actual = select({
-            "@platforms//os:windows": name + ".pyd",
-            "//conditions:default": name + ".so",
-        }),
+        actual = extension_name(name),
     )
 
 def nanobind_library(
