@@ -29,7 +29,7 @@ cc_library(
             "-flto",
         ],
     }) + sizeopts(),
-    defines = ["NB_SHARED=1"] + py_limited_api(),
+    defines = py_limited_api(),
     includes = ["include"],
     linkopts = select({
         "@rules_cc//cc/compiler:msvc-cl": ["/LTCG"],  # MSVC.

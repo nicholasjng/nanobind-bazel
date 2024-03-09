@@ -22,6 +22,7 @@ def _internal_configure_extension_impl(module_ctx):
         name = "robin_map",
         build_file = "//:robin_map.BUILD",
         strip_prefix = "robin-map-1.2.1",
+        integrity = "sha256-K1TSwd4vc76lxR1dy9ZIE6CMrxv93P3u5Aq3TpWZ6OM=",
         urls = ["https://github.com/Tessil/robin-map/archive/refs/tags/v1.2.1.tar.gz"],
     )
 
