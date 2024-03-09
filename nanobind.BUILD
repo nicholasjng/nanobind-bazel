@@ -5,11 +5,10 @@ Size optimizations used: -Os, LTO.
 Linker optimizations used: LTO (clang, gcc) / LTCG (MSVC), linker response file (macOS only).
 """
 
-load("@nanobind_bazel//:helpers.bzl", "pyversionhex", "sizedefs", "sizeopts")
+load("@nanobind_bazel//:helpers.bzl", "py_limited_api", "sizedefs", "sizeopts")
 
 licenses(["notice"])
 
-# TODO: Change this when cleaning up exports later.
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
@@ -30,7 +29,7 @@ cc_library(
             "-flto",
         ],
     }) + sizeopts(),
-    defines = pyversionhex(),
+    defines = ["NB_SHARED=1"] + py_limited_api(),
     includes = ["include"],
     linkopts = select({
         "@rules_cc//cc/compiler:msvc-cl": ["/LTCG"],  # MSVC.
@@ -53,21 +52,21 @@ cc_library(
 )
 
 cc_library(
-    name = "libnanobind",
+    name = "libnanobind-static",
     copts = select({
-        "@platforms//os:linux": [
-            "-ffunction-sections",
-            "-fdata-sections",
+        "@rules_cc//cc/compiler:msvc-cl": [],
+        "//conditions:default": [
+            "-fvisibility=hidden",
             "-fno-strict-aliasing",
         ],
-        "//conditions:default": [],
     }),
-    defines = pyversionhex(),
+    defines = py_limited_api(),
     linkopts = select({
         "@platforms//os:linux": [
             "--Wl,--gc-sections",
         ],
         "@platforms//os:macos": [
+            "-Wl,@$(location :cmake/darwin-ld-cpython.sym)",  # Apple.
             "-Wl,-dead_strip",
         ],
     }),
