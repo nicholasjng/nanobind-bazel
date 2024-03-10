@@ -38,47 +38,22 @@ cc_library(
         "//conditions:default": [
             "-fexceptions",
             "-flto",
+            "-fno-strict-aliasing",
         ],
     }) + sizeopts(),
     defines = py_limited_api(),
     includes = ["include"],
     linkopts = select({
-        "@rules_cc//cc/compiler:msvc-cl": ["/LTCG"],  # MSVC.
-        "@platforms//os:macos": [
-            "-Wl,@$(location :cmake/darwin-ld-cpython.sym)",  # Apple.
-        ],
-        "//conditions:default": [],
-    }),
-    local_defines = sizedefs(),  # sizeopts apply to nanobind only.
-    textual_hdrs = glob(
-        [
-            "include/**/*.h",
-            "src/*.h",
-        ],
-    ),
-    deps = _NB_DEPS,
-)
-
-cc_library(
-    name = "libnanobind-static",
-    copts = select({
-        "@rules_cc//cc/compiler:msvc-cl": [],
-        "//conditions:default": [
-            "-fvisibility=hidden",
-            "-fno-strict-aliasing",
-        ],
-    }),
-    defines = py_limited_api(),
-    linkopts = select({
         "@platforms//os:linux": [
-            "--Wl,--gc-sections",
+            "-Wl,--gc-sections",
         ],
         "@platforms//os:macos": [
             "-Wl,@$(location :cmake/darwin-ld-cpython.sym)",  # Apple.
             "-Wl,-dead_strip",
         ],
+        "@rules_cc//cc/compiler:msvc-cl": ["/LTCG"],  # MSVC.
+        "//conditions:default": [],
     }),
-    linkstatic = True,
     local_defines = sizedefs(),  # sizeopts apply to nanobind only.
     textual_hdrs = glob(
         [

@@ -49,8 +49,7 @@ def nanobind_extension(
         copts = copts + NANOBIND_COPTS,
         features = features + NANOBIND_FEATURES,
         deps = deps + NANOBIND_DEPS,
-        linkshared = True,
-        linkstatic = True,
+        linkshared = True,  # Python extensions need to be shared libs.
         **kwargs
     )
 
