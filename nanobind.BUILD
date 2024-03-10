@@ -1,16 +1,26 @@
 """
-A cross-platform nanobind Bazel BUILD.
+A cross-platform nanobind Bazel build.
 Supports size and linker optimizations across all three major operating systems.
-Size optimizations used: -Os, LTO
-Linker optimizations used: LTCG (MSVC on Windows), linker response file (macOS only).
+Size optimizations used: -Os, LTO.
+Linker optimizations used: LTO (clang, gcc) / LTCG (MSVC), linker response file (macOS only).
 """
 
-load("@nanobind_bazel//:helpers.bzl", "pyversionhex", "sizedefs", "sizeopts")
+load("@nanobind_bazel//:helpers.bzl", "py_limited_api", "sizedefs", "sizeopts")
 
 licenses(["notice"])
 
-# TODO: Change this when cleaning up exports later.
 package(default_visibility = ["//visibility:public"])
+
+_NB_DEPS = [
+    "@robin_map",
+    "@rules_python//python/cc:current_py_cc_headers",
+] + select({
+    # we need to link in the Python libs only on Windows to signal to the linker that it
+    # needs to go searching for these symbols at runtime.
+    # TODO: This seems Windows-specific, so change to `@platforms//os:windows`?
+    "@rules_cc//cc/compiler:msvc-cl": ["@rules_python//python/cc:current_py_cc_libs"],
+    "//conditions:default": [],
+})
 
 cc_library(
     name = "nanobind",
@@ -28,19 +38,20 @@ cc_library(
         "//conditions:default": [
             "-fexceptions",
             "-flto",
+            "-fno-strict-aliasing",
         ],
     }) + sizeopts(),
-    defines = pyversionhex(),
-    includes = [
-        "ext/robin_map/include",
-        "include",
-    ],
+    defines = py_limited_api(),
+    includes = ["include"],
     linkopts = select({
-        "@rules_cc//cc/compiler:msvc-cl": ["/LTCG"],  # MSVC.
+        "@platforms//os:linux": [
+            "-Wl,--gc-sections",
+        ],
         "@platforms//os:macos": [
             "-Wl,@$(location :cmake/darwin-ld-cpython.sym)",  # Apple.
             "-Wl,-dead_strip",
         ],
+        "@rules_cc//cc/compiler:msvc-cl": ["/LTCG"],  # MSVC.
         "//conditions:default": [],
     }),
     local_defines = sizedefs(),  # sizeopts apply to nanobind only.
@@ -50,8 +61,5 @@ cc_library(
             "src/*.h",
         ],
     ),
-    deps = [
-        "@robin_map",
-        "@rules_python//python/cc:current_py_cc_headers",
-    ],
+    deps = _NB_DEPS,
 )

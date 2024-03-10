@@ -15,7 +15,7 @@ load("@nanobind_bazel//:helpers.bzl", "extension_name")
 
 NANOBIND_COPTS = select({
     Label("@rules_cc//cc/compiler:msvc-cl"): [],
-    "//conditions:default": ["-fexceptions", "-fvisibility=hidden"],
+    "//conditions:default": ["-fexceptions", "-fno-strict-aliasing"],
 })
 
 NANOBIND_FEATURES = [
@@ -31,8 +31,10 @@ NANOBIND_DEPS = [
 # A C++ Python extension library built with nanobind.
 # Given a name $NAME, defines the following targets:
 # 1. $NAME.so, a shared object library for use on Linux/Mac.
-# 2. $NAME.pyd, a copy of $NAME.so for use on Windows.
-# 3. $NAME, an alias pointing to the appropriate library
+# 2. $NAME.abi3.so, a copy of $NAME.so for Linux/Mac,
+#     indicating that it is compatible with the Python stable ABI.
+# 3. $NAME.pyd, a copy of $NAME.so for use on Windows.
+# 4. $NAME, an alias pointing to the appropriate library
 #    depending on the target platform.
 def nanobind_extension(
         name,
@@ -47,8 +49,7 @@ def nanobind_extension(
         copts = copts + NANOBIND_COPTS,
         features = features + NANOBIND_FEATURES,
         deps = deps + NANOBIND_DEPS,
-        linkshared = True,
-        linkstatic = True,
+        linkshared = True,  # Python extensions need to be shared libs.
         **kwargs
     )
 
