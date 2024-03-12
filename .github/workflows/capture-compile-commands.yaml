@@ -5,7 +5,7 @@ on:
 
 jobs:
   nb-compile-commands:
-    name: Capture nanobind CMake compile commands on ${{ matrix.os }}
+    name: Capture nanobind compile commands on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -42,6 +42,9 @@ jobs:
       - name: Clean repo and switch to Bazel
         run: git clean -xdf && git checkout bazel
         working-directory: nanobind_example
+      - name: Build wheel using Bazel
+        run: python -m build . --wheel
+        working-directory: nanobind_example
       - name: Extract Bazel compile commands for ${{ matrix.os}}
         run: |
           bazel run @hedron_compile_commands//:refresh_all \
@@ -53,14 +56,19 @@ jobs:
             --@nanobind_bazel//:py-limited-api=cp312
         shell: bash
         working-directory: nanobind_example
+      - name: Rearrange files into a single output directory
+        run: |
+          mkdir ${{ matrix.os }} &&
+          mv compile_commands.json ${{ matrix.os }} &&
+          mv bazel-out/*-opt/**/*.params ${{ matrix.os }}
+        shell: bash
+        working-directory: nanobind_example
       - name: Upload Bazel compile commands and flag files for ${{ matrix.os }}
         uses: actions/upload-artifact@v4
         with:
-          name: bazel-compile-commands-${{ matrix.os}}
+          name: bazel-compile-commands-${{ matrix.os }}
           # there should be two params files - the libnanobind one, and the nanobind_example_ext one.
-          path: |
-            nanobind_example/compile_commands.json
-            nanobind_example/bazel-out/**/*.params
+          path: nanobind_example/${{ matrix.os }}
           if-no-files-found: error
   merge-compile-commands:
     name: Stitch together previously collected commands
