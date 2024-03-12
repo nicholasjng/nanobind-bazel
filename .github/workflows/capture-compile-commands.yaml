@@ -67,8 +67,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bazel-compile-commands-${{ matrix.os }}
-          # there should be two params files - the libnanobind one, and the nanobind_example_ext one.
-          path: nanobind_example/${{ matrix.os }}
+          # use dir glob to preserve top-level directories.
+          path: |
+            nanobind_example/*-latest/*.params
+            nanobind_example/*-latest/compile_commands.json
           if-no-files-found: error
   merge-compile-commands:
     name: Stitch together previously collected commands
