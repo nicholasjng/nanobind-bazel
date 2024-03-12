@@ -58,9 +58,9 @@ jobs:
         working-directory: nanobind_example
       - name: Rearrange files into a single output directory
         run: |
-          mkdir ${{ matrix.os }} &&
-          mv compile_commands.json ${{ matrix.os }} &&
-          mv bazel-out/*-opt/**/*.params ${{ matrix.os }}
+          mkdir ${{ matrix.os }}
+          cp compile_commands.json ${{ matrix.os }}
+          find bazel-out/ -name '*.params' |  xargs  -I _ cp _ ${{ matrix.os }}
         shell: bash
         working-directory: nanobind_example
       - name: Upload Bazel compile commands and flag files for ${{ matrix.os }}
