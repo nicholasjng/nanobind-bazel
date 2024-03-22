@@ -31,13 +31,11 @@ cc_library(
     }),
     copts = select({
         "@rules_cc//cc/compiler:msvc-cl": [
-            "/EHsc",  # exceptions
-            "/GL",  # LTO / whole program optimization
+            "/EHsc",  # exceptions.
         ],
         # clang and gcc, across all platforms.
         "//conditions:default": [
             "-fexceptions",
-            "-flto",
             "-fno-strict-aliasing",
         ],
     }) + sizeopts(),
@@ -49,9 +47,7 @@ cc_library(
         ],
         "@platforms//os:macos": [
             "-Wl,@$(location :cmake/darwin-ld-cpython.sym)",  # Apple.
-            "-Wl,-dead_strip",
         ],
-        "@rules_cc//cc/compiler:msvc-cl": ["/LTCG"],  # MSVC.
         "//conditions:default": [],
     }),
     local_defines = sizedefs(),  # sizeopts apply to nanobind only.
