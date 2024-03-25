@@ -62,7 +62,7 @@ def nanobind_extension(
             A list of dependencies of this extension.
         domain: str, default ''
             The nanobind domain to set for this extension. A nanobind domain is
-            an optional attribute to set that scopes extension code to a named
+            an optional attribute that can be set to scope extension code to a named
             domain, which avoids conflicts with other extensions.
         local_defines: list
             A list of preprocessor defines to set for this target.
@@ -72,7 +72,9 @@ def nanobind_extension(
             directly to the resulting cc_binary target.
     """
     if domain != "":
-        local_defines.append("NB_DOMAIN={}".format(domain))
+        ddomain = ["NB_DOMAIN={}".format(domain)]
+    else:
+        ddomain = []
 
     native.cc_binary(
         name = name + ".so",
@@ -80,7 +82,7 @@ def nanobind_extension(
         copts = copts + NANOBIND_COPTS,
         features = features + NANOBIND_FEATURES,
         deps = deps + NANOBIND_DEPS,
-        local_defines = local_defines,
+        local_defines = local_defines + ddomain,
         linkshared = True,  # Python extensions need to be shared libs.
         **kwargs
     )
