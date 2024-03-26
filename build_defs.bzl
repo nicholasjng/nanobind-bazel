@@ -24,31 +24,65 @@ NANOBIND_FEATURES = [
 ]
 
 NANOBIND_DEPS = [
-    Label("@nanobind"),
+    Label("@nanobind//:nanobind"),
     "@rules_python//python/cc:current_py_cc_headers",
 ]
 
-# A C++ Python extension library built with nanobind.
-# Given a name $NAME, defines the following targets:
-# 1. $NAME.so, a shared object library for use on Linux/Mac.
-# 2. $NAME.abi3.so, a copy of $NAME.so for Linux/Mac,
-#     indicating that it is compatible with the Python stable ABI.
-# 3. $NAME.pyd, a copy of $NAME.so for use on Windows.
-# 4. $NAME, an alias pointing to the appropriate library
-#    depending on the target platform.
 def nanobind_extension(
         name,
         srcs = [],
         copts = [],
         features = [],
         deps = [],
+        domain = "",
+        local_defines = [],
         **kwargs):
+    """A C++ Python extension library built with nanobind.
+
+    Given a name $NAME, defines the following targets:
+    1. $NAME.so, a shared object library for use on Linux/Mac.
+    2. $NAME.abi3.so, a copy of $NAME.so for Linux/Mac,
+        indicating that it is compatible with the Python stable ABI.
+    3. $NAME.pyd, a copy of $NAME.so for use on Windows.
+    4. $NAME, an alias pointing to the appropriate library
+        depending on the target platform.
+
+    Args:
+        name: str
+            A name for this target. This becomes the Python module name
+            used by the resulting nanobind extension.
+        srcs: list
+            A list of sources and headers to go into this target.
+        copts: list
+            A list of compiler optimizations. Augmented with nanobind-specific
+            compiler optimizations by default.
+        features: list
+            A list of C++ features to enable for this extension.
+        deps: list
+            A list of dependencies of this extension.
+        domain: str, default ''
+            The nanobind domain to set for this extension. A nanobind domain is
+            an optional attribute that can be set to scope extension code to a named
+            domain, which avoids conflicts with other extensions.
+        local_defines: list
+            A list of preprocessor defines to set for this target.
+            Augmented with -DNB_DOMAIN=$DOMAIN if the domain argument is given.
+        **kwargs: Any
+            Keyword arguments matching the cc_binary rule arguments, to be passed
+            directly to the resulting cc_binary target.
+    """
+    if domain != "":
+        ddomain = ["NB_DOMAIN={}".format(domain)]
+    else:
+        ddomain = []
+
     native.cc_binary(
         name = name + ".so",
         srcs = srcs,
         copts = copts + NANOBIND_COPTS,
         features = features + NANOBIND_FEATURES,
         deps = deps + NANOBIND_DEPS,
+        local_defines = local_defines + ddomain,
         linkshared = True,  # Python extensions need to be shared libs.
         **kwargs
     )
