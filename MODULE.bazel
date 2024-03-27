@@ -6,6 +6,13 @@ module(
 bazel_dep(name = "platforms", version = "0.0.8")
 bazel_dep(name = "rules_cc", version = "0.0.9")
 bazel_dep(name = "rules_python", version = "0.31.0")
+single_version_override(
+    module_name = "rules_python",
+    patch_strip = 1,
+    patches = ["//:windows-libs.patch"],
+    version = "0.31.0",
+)
+
 bazel_dep(name = "bazel_skylib", version = "1.5.0")
 
 # Parses the configured nanobind version from this file, and creates a `http_archive` for it.
