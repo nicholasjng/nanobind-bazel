@@ -1,0 +1,42 @@
+From 7da595130c61429c09a81121c78a41b7b070fe49 Mon Sep 17 00:00:00 2001
+From: Nicholas Junge <n.junge@appliedai.de>
+Date: Fri, 22 Mar 2024 15:17:07 +0100
+Subject: [PATCH] Add libs/python3.lib to libpython target for SABI builds on
+ Windows
+
+When targeting the Python Stable ABI on Windows (by setting the
+Py_LIMITED_API macro to a Python minimum version hex), the unversioned
+python3.lib needs to be linked instead of the versioned one
+(e.g. python38.lib for Python 3.8).
+
+Python's own config sets the library to link by default in a header
+called pyconfig.h (https://github.com/python/cpython/blob/9cc9e277254023c0ca08e1a9e379fd89475ca9c2/PC/pyconfig.h#L270),
+which prompts the linker to search for python3.lib if a stable ABI
+extension is built using `@rules_python` toolchains.
+
+Since this library is not exported on Windows in the `python_repository()`
+rule, it's added now to allow Python SABI extensions to be built (and
+linked) on Windows with `@rules_python`.
+
+Since Python takes responsibility for linking the correct lib on Windows,
+and never both at the same time, no other changes are made.
+---
+ python/repositories.bzl | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/python/repositories.bzl b/python/repositories.bzl
+index aab68eb..183e17f 100644
+--- a/python/repositories.bzl
++++ b/python/repositories.bzl
+@@ -319,7 +319,7 @@ cc_library(
+     name = "libpython",
+     hdrs = [":includes"],
+     srcs = select({{
+-        "@platforms//os:windows": ["python3.dll", "libs/python{python_version_nodot}.lib"],
++        "@platforms//os:windows": ["python3.dll", "python{python_version_nodot}.dll", "libs/python3.lib", "libs/python{python_version_nodot}.lib"],
+         "@platforms//os:macos": ["lib/libpython{python_version}.dylib"],
+         "@platforms//os:linux": ["lib/libpython{python_version}.so", "lib/libpython{python_version}.so.1.0"],
+     }}),
+-- 
+2.39.3 (Apple Git-146)
+
