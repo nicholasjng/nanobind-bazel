@@ -18,23 +18,14 @@ NANOBIND_COPTS = select({
     "//conditions:default": ["-fexceptions", "-fno-strict-aliasing"],
 })
 
-NANOBIND_FEATURES = [
-    "-use_header_modules",
-    "-parse_headers",
-]
-
-NANOBIND_DEPS = [
-    Label("@nanobind//:nanobind"),
-    "@rules_python//python/cc:current_py_cc_headers",
-]
+NANOBIND_DEPS = [Label("@nanobind//:nanobind")]
 
 def nanobind_extension(
         name,
+        domain = "",
         srcs = [],
         copts = [],
-        features = [],
         deps = [],
-        domain = "",
         local_defines = [],
         **kwargs):
     """A C++ Python extension library built with nanobind.
@@ -51,19 +42,17 @@ def nanobind_extension(
         name: str
             A name for this target. This becomes the Python module name
             used by the resulting nanobind extension.
+        domain: str, default ''
+            The nanobind domain to set for this extension. A nanobind domain is
+            an optional attribute that can be set to scope extension code to a named
+            domain, which avoids conflicts with other extensions.
         srcs: list
             A list of sources and headers to go into this target.
         copts: list
             A list of compiler optimizations. Augmented with nanobind-specific
             compiler optimizations by default.
-        features: list
-            A list of C++ features to enable for this extension.
         deps: list
             A list of dependencies of this extension.
-        domain: str, default ''
-            The nanobind domain to set for this extension. A nanobind domain is
-            an optional attribute that can be set to scope extension code to a named
-            domain, which avoids conflicts with other extensions.
         local_defines: list
             A list of preprocessor defines to set for this target.
             Augmented with -DNB_DOMAIN=$DOMAIN if the domain argument is given.
@@ -72,17 +61,16 @@ def nanobind_extension(
             directly to the resulting cc_binary target.
     """
     if domain != "":
-        ddomain = ["NB_DOMAIN={}".format(domain)]
+        NANOBIND_DOMAIN = ["NB_DOMAIN={}".format(domain)]
     else:
-        ddomain = []
+        NANOBIND_DOMAIN = []
 
     native.cc_binary(
         name = name + ".so",
         srcs = srcs,
         copts = copts + NANOBIND_COPTS,
-        features = features + NANOBIND_FEATURES,
         deps = deps + NANOBIND_DEPS,
-        local_defines = local_defines + ddomain,
+        local_defines = local_defines + NANOBIND_DOMAIN,
         linkshared = True,  # Python extensions need to be shared libs.
         **kwargs
     )
@@ -107,13 +95,11 @@ def nanobind_extension(
 def nanobind_library(
         name,
         copts = [],
-        features = [],
         deps = [],
         **kwargs):
     native.cc_library(
         name = name,
         copts = copts + NANOBIND_COPTS,
-        features = features + NANOBIND_FEATURES,
         deps = deps + NANOBIND_DEPS,
         **kwargs
     )
@@ -121,13 +107,11 @@ def nanobind_library(
 def nanobind_test(
         name,
         copts = [],
-        features = [],
         deps = [],
         **kwargs):
     native.cc_test(
         name = name,
         copts = copts + NANOBIND_COPTS,
-        features = features + NANOBIND_FEATURES,
         deps = deps + NANOBIND_DEPS,
         **kwargs
     )

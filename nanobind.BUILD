@@ -11,11 +11,6 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
-_NB_DEPS = [
-    "@robin_map",
-    "@rules_python//python/cc:current_py_cc_headers",
-]
-
 cc_library(
     name = "nanobind",
     srcs = glob(["src/*.cpp"]),
@@ -40,7 +35,8 @@ cc_library(
             "-Wl,--gc-sections",
         ],
         "@platforms//os:macos": [
-            "-Wl,@$(location :cmake/darwin-ld-cpython.sym)",  # Apple.
+            # chained fixups on Apple platforms.
+            "-Wl,@$(location :cmake/darwin-ld-cpython.sym)",
         ],
         "//conditions:default": [],
     }),
@@ -51,5 +47,8 @@ cc_library(
             "src/*.h",
         ],
     ),
-    deps = _NB_DEPS,
+    deps = [
+        "@robin_map",
+        "@rules_python//python/cc:current_py_cc_headers",
+    ],
 )
