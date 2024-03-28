@@ -7,7 +7,7 @@ exports_files(["LICENSE"])
 
 bool_flag(
     name = "minsize",
-    build_setting_default = False,
+    build_setting_default = True,
 )
 
 config_setting(
