@@ -24,6 +24,8 @@ cc_library(
         ],
         # clang and gcc, across all platforms.
         "//conditions:default": [
+            "-ffunction-sections",
+            "-fdata-sections",
             "-fexceptions",
             "-fno-strict-aliasing",
         ],

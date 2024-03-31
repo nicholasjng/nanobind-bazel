@@ -9,7 +9,7 @@ def sizeopts():
 
 def sizedefs():
     return select({
-        "@nanobind_bazel//:with_sizeopts": ["NB_COMPACT_ASSERTS"],
+        "@nanobind_bazel//:with_sizeopts": ["NB_COMPACT_ASSERTIONS"],
         "@nanobind_bazel//:without_sizeopts": [],
     })
 
