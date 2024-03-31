@@ -19,18 +19,21 @@ cc_library(
         "//conditions:default": [],
     }),
     copts = select({
-        "@rules_cc//cc/compiler:msvc-cl": [
-            "/EHsc",  # exceptions.
-        ],
-        # clang and gcc, across all platforms.
-        "//conditions:default": [
-            "-ffunction-sections",
-            "-fdata-sections",
-            "-fexceptions",
+        "@platforms//os:macos": [
+            "-fPIC",
+            "-fvisibility=hidden",
             "-fno-strict-aliasing",
         ],
+        "@platforms//os:linux": [
+            "-fPIC",
+            "-ffunction-sections",
+            "-fdata-sections",
+            "-fno-strict-aliasing",
+        ],
+        "//conditions:default": [],
     }) + sizeopts(),
     defines = py_limited_api(),
+    features = ["-pic"],  # use a compiler flag instead.
     includes = ["include"],
     linkopts = select({
         "@platforms//os:linux": [
