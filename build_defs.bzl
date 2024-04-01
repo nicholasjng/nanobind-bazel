@@ -11,12 +11,23 @@ which can then be included e.g. as a `data` input in a ``native.py_library``.
 """
 
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
-load("@nanobind_bazel//:helpers.bzl", "extension_name")
+load("@nanobind_bazel//:helpers.bzl", "extension_name", "sizeopts")
 
 NANOBIND_COPTS = select({
-    Label("@rules_cc//cc/compiler:msvc-cl"): [],
-    "//conditions:default": ["-fexceptions", "-fno-strict-aliasing"],
-})
+    "@platforms//os:macos": [
+        "-fPIC",
+        "-fvisibility=hidden",
+        "-fno-stack-protector",
+    ],
+    "@platforms//os:linux": [
+        "-fPIC",
+        "-fvisibility=hidden",
+        "-fno-stack-protector",
+        "-ffunction-sections",
+        "-fdata-sections",
+    ],
+    "//conditions:default": [],
+}) + sizeopts()
 
 NANOBIND_DEPS = [Label("@nanobind//:nanobind")]
 

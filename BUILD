@@ -3,11 +3,14 @@ load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
 
 licenses(["notice"])
 
-exports_files(["LICENSE"])
+exports_files([
+    "LICENSE",
+    "pybind11_bazel.LICENSE",
+])
 
 bool_flag(
     name = "minsize",
-    build_setting_default = False,
+    build_setting_default = True,
 )
 
 config_setting(
