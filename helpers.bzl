@@ -1,16 +1,24 @@
 """Helper flags for nanobind build options."""
 
-def sizeopts():
+def nb_sizeopts():
     return select({
         "@nanobind_bazel//:msvc_and_minsize": ["/Os"],
         "@nanobind_bazel//:nonmsvc_and_minsize": ["-Os"],
         "@nanobind_bazel//:without_sizeopts": [],
     })
 
-def sizedefs():
+def nb_stripopts():
+    """Linker options to strip external and debug symbols from nanobind release builds."""
     return select({
-        "@nanobind_bazel//:with_sizeopts": ["NB_COMPACT_ASSERTIONS"],
-        "@nanobind_bazel//:without_sizeopts": [],
+        "@nanobind_bazel//:MacReleaseBuild": ["-Wl,-x", "-Wl,-S"],
+        "@nanobind_bazel//:LinuxReleaseBuild": ["-Wl,-s"],
+        "//conditions:default": [],
+    })
+
+def maybe_compact_asserts():
+    return select({
+        "@nanobind_bazel//:releaseBuild": ["NB_COMPACT_ASSERTIONS"],
+        "//conditions:default": [],
     })
 
 # Define the Python version hex if stable ABI builds are requested.

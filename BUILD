@@ -48,6 +48,45 @@ config_setting(
     flag_values = {":py-limited-api": "unset"},
 )
 
+config_setting(
+    name = "MacReleaseBuild",
+    constraint_values = [
+        "@platforms//os:macos",
+    ],
+    values = {
+        "compilation_mode": "opt",
+    },
+)
+
+config_setting(
+    name = "LinuxReleaseBuild",
+    constraint_values = [
+        "@platforms//os:linux",
+    ],
+    values = {
+        "compilation_mode": "opt",
+    },
+)
+
+config_setting(
+    name = "WindowsReleaseBuild",
+    constraint_values = [
+        "@platforms//os:windows",
+    ],
+    values = {
+        "compilation_mode": "opt",
+    },
+)
+
+selects.config_setting_group(
+    name = "releaseBuild",
+    match_any = [
+        ":LinuxReleaseBuild",
+        ":MacReleaseBuild",
+        ":WindowsReleaseBuild",
+    ],
+)
+
 selects.config_setting_group(
     name = "unix",
     match_any = [
