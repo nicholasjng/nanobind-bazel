@@ -5,7 +5,7 @@ Size optimizations used: -Os, LTO.
 Linker optimizations used: LTO (clang, gcc) / LTCG (MSVC), linker response file (macOS only).
 """
 
-load("@nanobind_bazel//:helpers.bzl", "py_limited_api", "sizedefs", "sizeopts")
+load("@nanobind_bazel//:helpers.bzl", "py_limited_api", "sizedefs", "sizeopts", "stripopts")
 
 licenses(["notice"])
 
@@ -37,19 +37,14 @@ cc_library(
     features = ["-pic"],  # use a compiler flag instead.
     includes = ["include"],
     linkopts = select({
-        "@platforms//os:linux": [
-            "-Wl,-s",
-            "-Wl,--gc-sections",
-        ],
+        "@platforms//os:linux": ["-Wl,--gc-sections"],
         "@platforms//os:macos": [
             # chained fixups on Apple platforms.
             "-Wl,@$(location :cmake/darwin-ld-cpython.sym)",
             "-Wl,-dead_strip",
-            "-Wl,-x",
-            "-Wl,-S",
         ],
         "//conditions:default": [],
-    }),
+    }) + stripopts(),
     local_defines = sizedefs(),  # sizeopts apply to nanobind only.
     textual_hdrs = glob(
         [

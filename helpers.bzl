@@ -7,6 +7,14 @@ def sizeopts():
         "@nanobind_bazel//:without_sizeopts": [],
     })
 
+def stripopts():
+    """Linker options to strip external and debug symbols from nanobind release builds."""
+    return select({
+        "@nanobind_bazel//:MacReleaseBuild": ["-Wl,-x", "-Wl,-S"],
+        "@nanobind_bazel//:LinuxReleaseBuild": ["-Wl,-s"],
+        "//conditions:default": [],
+    })
+
 def sizedefs():
     return select({
         "@nanobind_bazel//:with_sizeopts": ["NB_COMPACT_ASSERTIONS"],
