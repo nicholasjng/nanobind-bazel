@@ -68,6 +68,25 @@ config_setting(
     },
 )
 
+config_setting(
+    name = "WindowsReleaseBuild",
+    constraint_values = [
+        "@platforms//os:windows",
+    ],
+    values = {
+        "compilation_mode": "opt",
+    },
+)
+
+selects.config_setting_group(
+    name = "releaseBuild",
+    match_any = [
+        ":LinuxReleaseBuild",
+        ":MacReleaseBuild",
+        ":WindowsReleaseBuild",
+    ],
+)
+
 selects.config_setting_group(
     name = "unix",
     match_any = [

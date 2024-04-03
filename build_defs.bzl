@@ -11,7 +11,7 @@ which can then be included e.g. as a `data` input in a ``native.py_library``.
 """
 
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
-load("@nanobind_bazel//:helpers.bzl", "extension_name", "sizeopts")
+load("@nanobind_bazel//:helpers.bzl", "extension_name", "nb_sizeopts")
 
 NANOBIND_COPTS = select({
     "@platforms//os:macos": [
@@ -27,7 +27,7 @@ NANOBIND_COPTS = select({
         "-fdata-sections",
     ],
     "//conditions:default": [],
-}) + sizeopts()
+}) + nb_sizeopts()
 
 NANOBIND_DEPS = [Label("@nanobind//:nanobind")]
 

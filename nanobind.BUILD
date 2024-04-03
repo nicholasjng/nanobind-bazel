@@ -2,10 +2,16 @@
 A cross-platform nanobind Bazel build.
 Supports size and linker optimizations across all three major operating systems.
 Size optimizations used: -Os, LTO.
-Linker optimizations used: LTO (clang, gcc) / LTCG (MSVC), linker response file (macOS only).
+Linker optimizations used: Debug stripping (release mode), linker response file (macOS only).
 """
 
-load("@nanobind_bazel//:helpers.bzl", "py_limited_api", "sizedefs", "sizeopts", "stripopts")
+load(
+    "@nanobind_bazel//:helpers.bzl",
+    "maybe_compact_asserts",
+    "nb_sizeopts",
+    "nb_stripopts",
+    "py_limited_api",
+)
 
 licenses(["notice"])
 
@@ -32,7 +38,7 @@ cc_library(
             "-fno-strict-aliasing",
         ],
         "//conditions:default": [],
-    }) + sizeopts(),
+    }) + nb_sizeopts(),
     defines = py_limited_api(),
     features = ["-pic"],  # use a compiler flag instead.
     includes = ["include"],
@@ -44,8 +50,8 @@ cc_library(
             "-Wl,-dead_strip",
         ],
         "//conditions:default": [],
-    }) + stripopts(),
-    local_defines = sizedefs(),  # sizeopts apply to nanobind only.
+    }) + nb_stripopts(),
+    local_defines = maybe_compact_asserts(),
     textual_hdrs = glob(
         [
             "include/**/*.h",
