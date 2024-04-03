@@ -26,6 +26,7 @@ cc_library(
         ],
         "@platforms//os:linux": [
             "-fPIC",
+            "-fvisibility=hidden",
             "-ffunction-sections",
             "-fdata-sections",
             "-fno-strict-aliasing",
@@ -37,11 +38,15 @@ cc_library(
     includes = ["include"],
     linkopts = select({
         "@platforms//os:linux": [
+            "-Wl,-s",
             "-Wl,--gc-sections",
         ],
         "@platforms//os:macos": [
             # chained fixups on Apple platforms.
             "-Wl,@$(location :cmake/darwin-ld-cpython.sym)",
+            "-Wl,-dead_strip",
+            "-Wl,-x",
+            "-Wl,-S",
         ],
         "//conditions:default": [],
     }),
