@@ -4,10 +4,12 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "robin_map",
-    hdrs = glob([
-        "include/tsl/*.h",
-    ]),
-    copts = ["-fexceptions"],
-    features = ["-use_header_modules"],  # Incompatible with -fexceptions.
+    hdrs = [
+        "include/tsl/robin_growth_policy.h",
+        "include/tsl/robin_hash.h",
+        "include/tsl/robin_map.h",
+        "include/tsl/robin_set.h",
+    ],
+    includes = ["."],
     strip_include_prefix = "include",
 )

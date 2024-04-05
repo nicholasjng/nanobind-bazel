@@ -8,6 +8,7 @@ Linker optimizations used: Debug stripping (release mode), linker response file 
 load(
     "@nanobind_bazel//:helpers.bzl",
     "maybe_compact_asserts",
+    "nb_common_opts",
     "nb_sizeopts",
     "nb_stripopts",
     "py_limited_api",
@@ -24,23 +25,8 @@ cc_library(
         "@platforms//os:macos": [":cmake/darwin-ld-cpython.sym"],
         "//conditions:default": [],
     }),
-    copts = select({
-        "@platforms//os:macos": [
-            "-fPIC",
-            "-fvisibility=hidden",
-            "-fno-strict-aliasing",
-        ],
-        "@platforms//os:linux": [
-            "-fPIC",
-            "-fvisibility=hidden",
-            "-ffunction-sections",
-            "-fdata-sections",
-            "-fno-strict-aliasing",
-        ],
-        "//conditions:default": [],
-    }) + nb_sizeopts(),
+    copts = nb_common_opts(mode = "library") + nb_sizeopts(),
     defines = py_limited_api(),
-    features = ["-pic"],  # use a compiler flag instead.
     includes = ["include"],
     linkopts = select({
         "@platforms//os:linux": ["-Wl,--gc-sections"],
