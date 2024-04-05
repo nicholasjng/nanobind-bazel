@@ -1,5 +1,22 @@
 """Helper flags for nanobind build options."""
 
+def nb_common_opts(mode = "user"):
+    unix_common_opts = [
+        "-fPIC",
+        "-fvisibility=hidden",
+        "-fno-strict-aliasing",
+    ]
+
+    if mode == "user":
+        # user-facing code gets stack smashing protection
+        # disable flag.
+        unix_common_opts.append("-fno-stack-protector")
+
+    return select({
+        "@nanobind_bazel//:unix": unix_common_opts,
+        "//conditions:default": [],
+    })
+
 def nb_sizeopts():
     return select({
         "@nanobind_bazel//:msvc_and_minsize": ["/Os"],
