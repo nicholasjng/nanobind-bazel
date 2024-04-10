@@ -13,27 +13,26 @@ Each target is given nanobind's specific build flags, optimizations and dependen
 
 ## Usage with bzlmod
 
-This repo is not yet pushed to the Bazel Central Registry (BCR). To use it, you can specify it with e.g. a `local_path_override`:
+This repo is published to the Bazel Central Registry (BCR). To use it, specify it as a `bazel_dep`:
 
 ```
-bazel_dep(name = "nanobind_bazel", version = "")
-local_path_override(module_name = "nanobind_bazel", path = "/path/to/nanobind-bazel")
+# the major version is equal to the major version of the internally used nanobind.
+bazel_dep(name = "nanobind_bazel", version = "1.0.0")
 ```
-
-A BCR release is planned pending more exhaustive testing and validation.
 
 ## Licenses and acknowledgements
 
 This library is heavily inspired by the [pybind11-bazel](https://github.com/pybind/pybind11_bazel) project, which does the same thing for pybind11.
-As I have used some of the code from that repository, especially for parsing out the version in MODULE.bazel, its [license](pybind11_bazel.LICENSE) is included here, too.
+As I have used some of the code from that repository, its [license](pybind11_bazel.LICENSE) is included here, too.
 
 In contrast to that project, though, nanobind does not support Python interpreter embedding, and endorses a few more size-related optimizations which I have included here.
 
 ## Roadmap
 
 - [x] First successful test, e.g. on wjakob's [nanobind example](https://github.com/wjakob/nanobind_example).
-- [ ] A BCR release, with a GitHub Actions job automating subsequent releases (optional).
-- [ ] Supporting local mode or git SHAs to pull nanobind from.
+- [x] A BCR release.
+- [ ] A `nanobind_shared_library` target for a `cc_shared_library` using (lib)nanobind.
+- [ ] Supporting custom nanobind build targets instead of the internal one.
 
 ## Contributing
 
