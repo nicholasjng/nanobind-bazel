@@ -20,7 +20,10 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "nanobind",
-    srcs = glob(["src/*.cpp"]),
+    srcs = glob(
+        include = ["src/*.cpp"],
+        exclude = ["src/nb_combined.cpp"],
+    ),
     additional_linker_inputs = select({
         "@platforms//os:macos": [":cmake/darwin-ld-cpython.sym"],
         "//conditions:default": [],
