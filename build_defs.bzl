@@ -80,17 +80,23 @@ def nanobind_extension(
         name = name + "_copy_so_to_abi3_so",
         src = name + ".so",
         out = name + ".abi3.so",
+        testonly = kwargs.get("testonly"),
+        visibility = kwargs.get("visibility"),
     )
 
     copy_file(
         name = name + "_copy_so_to_pyd",
         src = name + ".so",
         out = name + ".pyd",
+        testonly = kwargs.get("testonly"),
+        visibility = kwargs.get("visibility"),
     )
 
     native.alias(
         name = name,
         actual = extension_name(name),
+        testonly = kwargs.get("testonly"),
+        visibility = kwargs.get("visibility"),
     )
 
 def nanobind_library(
