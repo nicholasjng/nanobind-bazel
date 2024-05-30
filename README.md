@@ -13,12 +13,40 @@ Each target is given nanobind's specific build flags, optimizations and dependen
 
 ## Usage with bzlmod
 
-This repo is published to the Bazel Central Registry (BCR). To use it, specify it as a `bazel_dep`:
+nanobind-bazel is published to the Bazel Central Registry (BCR). To use it, specify it as a `bazel_dep`:
 
 ```
-# the major version is equal to the major version of the internally used nanobind.
-bazel_dep(name = "nanobind_bazel", version = "1.0.0")
+# the major version of nanobind-bazel is equal to the major version of the internally used nanobind.
+# In this case, we are building bindings with nanobind@v2.
+bazel_dep(name = "nanobind_bazel", version = "2.0.0")
 ```
+
+To instead use a development version, you can declare a `git_override()` dependency in your MODULE.bazel:
+
+```
+bazel_dep(name = "nanobind_bazel", version = "")
+git_override(
+    module_name = "nanobind_bazel",
+    commit = "COMMIT_SHA", # replace this with the actual commit SHA you want.
+    remote = "https://github.com/nicholasjng/nanobind-bazel",
+)
+```
+
+In local development scenarios, you can clone nanobind-bazel to your machine and then declare it as a `local_path_override()` like so:
+
+```
+bazel_dep(name = "nanobind_bazel", version = "")
+local_path_override(
+    module_name = "nanobind_bazel",
+    path = "path/to/nanobind-bazel/", # replace this with the actual path.
+)
+```
+
+## Bazel versions
+
+This library relies on the ability to pass inputs to the linker in `cc_library` targets, which became available starting in Bazel 6.4.0. For this reason, the minimum Bazel version compatible with this project is Bazel 6.4.0.
+
+In general, since Bazel 7 enabled bzlmod by default, no more intentional development efforts are made to support the workspace system.
 
 ## Licenses and acknowledgements
 
