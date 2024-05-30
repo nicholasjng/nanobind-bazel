@@ -7,6 +7,8 @@ Here's the full list of exported rules:
 - `nanobind_extension`, building a Python extension containing the bindings as a `*.so` file.
 These extensions can be used e.g. as a `data` dependency for a `py_library` target.
 - `nanobind_library`, a C++ library target that can be used as a dependency of a `nanobind_extension`. Directly forwards its arguments to the `cc_library` rule.
+- `nanobind_shared_library`, a C++ shared library target that can be used to
+produce smaller objects in scenarios with multiple independent bindings extensions. Directly forwards its arguments to the `cc_shared_library` rule.
 - `nanobind_test`, a C++ test for a `nanobind_library`. Forwards its argument to a `cc_test`.
 
 Each target is given nanobind's specific build flags, optimizations and dependencies.
@@ -31,7 +33,7 @@ In contrast to that project, though, nanobind does not support Python interprete
 
 - [x] First successful test, e.g. on wjakob's [nanobind example](https://github.com/wjakob/nanobind_example).
 - [x] A BCR release.
-- [ ] A `nanobind_shared_library` target for a `cc_shared_library` using (lib)nanobind.
+- [x] A `nanobind_shared_library` target for a `cc_shared_library` using (lib)nanobind.
 - [ ] Supporting custom nanobind build targets instead of the internal one.
 
 ## Contributing

@@ -111,6 +111,36 @@ def nanobind_library(
         **kwargs
     )
 
+def nanobind_shared_library(
+        name,
+        deps = [],
+        **kwargs):
+    """A shared library containing nanobind as a static dependency.
+
+    Using a shared nanobind library is useful when partitioning C++ binding
+    code over multiple extensions, where linking all of them statically would
+    produce much larger bindings than necessary.
+
+    Args:
+        name: str
+            A name for this target. On Linux/MacOS, the target name determines
+            the name of the resulting shared object file via lib${name}.so, e.g.
+            a `cc_shared_library(name = "nanobind-tensorflow")` produces the
+            shared object file libnanobind-tensorflow.so.
+        deps: list
+            A list of static dependencies for this shared library. By default,
+            a statically built nanobind is included.
+        **kwargs: Any
+            Additional keyword arguments passed directly to the `cc_shared_library`
+            rule. For a comprehensive list, see the Bazel documentation at
+            https://bazel.build/reference/be/c-cpp#cc_shared_library.
+    """
+    native.cc_shared_library(
+        name = name,
+        deps = deps + NANOBIND_DEPS,
+        **kwargs
+    )
+
 def nanobind_test(
         name,
         copts = [],
