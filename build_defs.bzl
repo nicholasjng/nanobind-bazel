@@ -17,6 +17,7 @@ load(
     "nb_common_opts",
     "nb_sizeopts",
 )
+load("@rules_python//python:py_binary.bzl", "py_binary")
 
 NANOBIND_COPTS = nb_common_opts() + nb_sizeopts()
 NANOBIND_DEPS = [Label("@nanobind//:nanobind")]
@@ -139,6 +140,71 @@ def nanobind_shared_library(
         name = name,
         deps = deps + NANOBIND_DEPS,
         **kwargs
+    )
+
+def nanobind_stubgen(
+        name,
+        module,
+        output_file,
+        imports = [],
+        pattern_file = None,
+        marker_file = None,
+        include_private_members = False,
+        exclude_docstrings = False):
+    """A stub file containing Python type annotations for a nanobind extension.
+
+    Args:
+        name: str
+            Name of this stub generation target, unused.
+        module: label
+            Label of the extension module for which the stub file should be
+            generated.
+        output_file: str
+            Output file path, relative to the current workspace's bindir.
+        imports: list
+            List of modules to import for stub generation.
+        pattern_file: str or None
+            Path to a pattern file used for programmatically editing generated stubs.
+            For more information, consider the documentation under
+            https://nanobind.readthedocs.io/en/latest/typing.html#pattern-files.
+        marker_file: str or None
+            An empty typing marker file to add to the project, most often named
+            "py.typed".
+        include_private_members: bool
+            Whether to include private module members, i.e. those starting and/or
+            ending with an underscore ("_").
+        exclude_docstrings: bool
+            Whether to exclude all docstrings from all members of the generated
+            stub file.
+    """
+
+    # TODO: Add docstring
+    args = []
+
+    # args.append("-m {}".format(module))
+    args.append("-m $(rlocationpath {})".format(module))
+    args.append("-o $(BINDIR)/{}".format(output_file))
+    # args.extend(["-i {}".format(imp) for imp in imports])
+
+    # add pattern and marker files
+    if pattern_file:
+        args.append("-p $(rlocationpath {})".format(pattern_file))
+    if marker_file:
+        args.append("-M $(rlocationpath {})".format(marker_file))
+
+    if include_private_members:
+        args.append("--include-private")
+    if exclude_docstrings:
+        args.append("--exclude-docstrings")
+
+    py_binary(
+        name = name,
+        srcs = [Label("@nanobind//:src/stubgen.py")],
+        main = Label("@nanobind//:src/stubgen.py"),
+        deps = [Label("@pypi__typing_extensions//:lib")],
+        data = [module] + NANOBIND_DEPS,
+        imports = imports,
+        args = args,
     )
 
 def nanobind_test(
