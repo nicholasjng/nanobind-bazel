@@ -149,3 +149,10 @@ selects.config_setting_group(
         ":with_sizeopts",
     ],
 )
+
+py_binary(
+    name = "nanobind_stubgen",
+    srcs = ["@nanobind//:src/stubgen.py"],
+    main = "@nanobind//:src/stubgen.py",
+    deps = ["@pypi__typing_extensions//:lib"],
+)

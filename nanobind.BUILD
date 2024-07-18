@@ -52,3 +52,5 @@ cc_library(
         "@rules_python//python/cc:current_py_cc_headers",
     ],
 )
+
+exports_files(["src/stubgen.py"])

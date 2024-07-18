@@ -11,4 +11,4 @@ bazel_dep(name = "bazel_skylib", version = "1.6.1")
 
 # Creates a `http_archive` for nanobind and robin-map.
 internal_configure = use_extension("//:internal_configure.bzl", "internal_configure_extension")
-use_repo(internal_configure, "nanobind")
+use_repo(internal_configure, "nanobind", "pypi__typing_extensions")
