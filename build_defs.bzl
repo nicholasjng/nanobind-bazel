@@ -3,6 +3,8 @@ Build defs for nanobind.
 
 The ``nanobind_extension`` corresponds to a ``cc_binary``,
 the ``nanobind_library`` to a ``cc_library``,
+the ``nanobind_shared_library`` to a ``cc_shared_library``,
+the ``nanobind_stubgen`` to a ``py_binary``,
 and the ``nanobind_test`` to a ``cc_test``.
 
 For creating Python bindings, the most likely case is a ``nanobind_extension``
@@ -156,11 +158,12 @@ def nanobind_stubgen(
     Args:
         name: str
             Name of this stub generation target, unused.
-        module: label
+        module: Label
             Label of the extension module for which the stub file should be
             generated.
         output_file: str
-            Output file path, relative to the current workspace's bindir.
+            Output file path, relative to the location of the BUILD file containing
+            the ``nanobind_stubgen`` target.
         imports: list
             List of modules to import for stub generation.
         pattern_file: str or None
@@ -174,23 +177,22 @@ def nanobind_stubgen(
             Whether to include private module members, i.e. those starting and/or
             ending with an underscore ("_").
         exclude_docstrings: bool
-            Whether to exclude all docstrings from all members of the generated
+            Whether to exclude all docstrings of all module members from the generated
             stub file.
     """
 
-    # TODO: Add docstring
-    args = []
+    NB_STUBGEN = Label("@nanobind//:src/stubgen.py")
+    loc = "$(rlocationpath {})"
 
-    # args.append("-m {}".format(module))
-    args.append("-m $(rlocationpath {})".format(module))
-    args.append("-o $(BINDIR)/{}".format(output_file))
-    # args.extend(["-i {}".format(imp) for imp in imports])
+    args = []
+    args.append("-m " + loc.format(module))
+    args.append("-o {}".format(output_file))
 
     # add pattern and marker files
     if pattern_file:
-        args.append("-p $(rlocationpath {})".format(pattern_file))
+        args.append("-p " + loc.format(pattern_file))
     if marker_file:
-        args.append("-M $(rlocationpath {})".format(marker_file))
+        args.append("-M " + loc.format(marker_file))
 
     if include_private_members:
         args.append("--include-private")
@@ -199,10 +201,10 @@ def nanobind_stubgen(
 
     py_binary(
         name = name,
-        srcs = [Label("@nanobind//:src/stubgen.py")],
-        main = Label("@nanobind//:src/stubgen.py"),
+        srcs = [NB_STUBGEN],
+        main = NB_STUBGEN,
         deps = [Label("@pypi__typing_extensions//:lib")],
-        data = [module] + NANOBIND_DEPS,
+        data = [module],
         imports = imports,
         args = args,
     )
