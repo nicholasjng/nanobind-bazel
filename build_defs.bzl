@@ -147,7 +147,7 @@ def nanobind_shared_library(
 def nanobind_stubgen(
         name,
         module,
-        output_file,
+        output_file = None,
         imports = [],
         pattern_file = None,
         marker_file = None,
@@ -161,9 +161,10 @@ def nanobind_stubgen(
         module: Label
             Label of the extension module for which the stub file should be
             generated.
-        output_file: str
-            Output file path, relative to the location of the BUILD file containing
-            the ``nanobind_stubgen`` target.
+        output_file: str or None
+            Output file path for the generated stub. If none is given, the
+            stub will be placed under the same location as the module in
+            your source tree.
         imports: list
             List of modules to import for stub generation.
         pattern_file: str or None
@@ -181,12 +182,18 @@ def nanobind_stubgen(
             stub file.
     """
 
-    NB_STUBGEN = Label("@nanobind//:src/stubgen.py")
+    NB_STUBGEN = Label("@nanobind//:stubgen")
+    STUBGEN_WRAPPER = Label("@nanobind_bazel//:stubgen_wrapper.py")
     loc = "$(rlocationpath {})"
 
     args = []
     args.append("-m " + loc.format(module))
-    args.append("-o {}".format(output_file))
+
+    # to be searchable by path expansion, a file must be
+    # declared by a rule beforehand. This might not be the
+    # case for a generated stub, so we just give the raw name here
+    if output_file:
+        args.append("-o $(BINDIR)/{}".format(output_file))
 
     # add pattern and marker files
     if pattern_file:
@@ -201,9 +208,13 @@ def nanobind_stubgen(
 
     py_binary(
         name = name,
-        srcs = [NB_STUBGEN],
-        main = NB_STUBGEN,
-        deps = [Label("@pypi__typing_extensions//:lib")],
+        srcs = [STUBGEN_WRAPPER],
+        main = STUBGEN_WRAPPER,
+        deps = [
+            Label("@pypi__typing_extensions//:lib"),
+            Label("@rules_python//python/runfiles"),
+            NB_STUBGEN,
+        ],
         data = [module],
         imports = imports,
         args = args,

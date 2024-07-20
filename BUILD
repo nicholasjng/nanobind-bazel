@@ -6,6 +6,7 @@ licenses(["notice"])
 exports_files([
     "LICENSE",
     "pybind11_bazel.LICENSE",
+    "stubgen_wrapper.py",
 ])
 
 bool_flag(
@@ -148,11 +149,4 @@ selects.config_setting_group(
         ":nonmsvc",
         ":with_sizeopts",
     ],
-)
-
-py_binary(
-    name = "nanobind_stubgen",
-    srcs = ["@nanobind//:src/stubgen.py"],
-    main = "@nanobind//:src/stubgen.py",
-    deps = ["@pypi__typing_extensions//:lib"],
 )

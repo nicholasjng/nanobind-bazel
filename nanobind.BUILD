@@ -53,4 +53,9 @@ cc_library(
     ],
 )
 
-exports_files(["src/stubgen.py"])
+py_library(
+    name = "stubgen",
+    srcs = ["src/stubgen.py"],
+    imports = ["src"],
+    deps = ["@pypi__typing_extensions//:lib"],
+)
