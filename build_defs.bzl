@@ -162,9 +162,9 @@ def nanobind_stubgen(
             Label of the extension module for which the stub file should be
             generated.
         output_file: str or None
-            Output file path for the generated stub. If none is given, the
-            stub will be placed under the same location as the module in
-            your source tree.
+            Output file path for the generated stub, relative to $(BINDIR).
+            If none is given, the stub will be placed under the same location
+            as the module in your source tree.
         imports: list
             List of modules to import for stub generation.
         pattern_file: str or None
@@ -173,7 +173,7 @@ def nanobind_stubgen(
             https://nanobind.readthedocs.io/en/latest/typing.html#pattern-files.
         marker_file: str or None
             An empty typing marker file to add to the project, most often named
-            "py.typed".
+            "py.typed". Must be given relative to your Python project root.
         include_private_members: bool
             Whether to include private module members, i.e. those starting and/or
             ending with an underscore ("_").
@@ -181,6 +181,7 @@ def nanobind_stubgen(
             Whether to exclude all docstrings of all module members from the generated
             stub file.
     """
+    # TODO: Expose envs and deps targets to allow marker and pattern files
 
     NB_STUBGEN = Label("@nanobind//:stubgen")
     STUBGEN_WRAPPER = Label("@nanobind_bazel//:stubgen_wrapper.py")
@@ -193,13 +194,13 @@ def nanobind_stubgen(
     # declared by a rule beforehand. This might not be the
     # case for a generated stub, so we just give the raw name here
     if output_file:
-        args.append("-o $(BINDIR)/{}".format(output_file))
+        args.append("-o {}".format(output_file))
 
     # add pattern and marker files
     if pattern_file:
         args.append("-p " + loc.format(pattern_file))
     if marker_file:
-        args.append("-M " + loc.format(marker_file))
+        args.append("-M {}".format(marker_file))
 
     if include_private_members:
         args.append("--include-private")
