@@ -6,6 +6,7 @@ Here's the full list of exported rules:
 
 - `nanobind_extension`, building a Python extension containing the bindings as a `*.so` file.
 These extensions can be used e.g. as a `data` dependency for a `py_library` target.
+- `nanobind_stubgen`, a rule pointing to a `py_binary` to create a Python stub file from a previously built `nanobind_extension`. (Available only with nanobind>=v2.0.0.)
 - `nanobind_library`, a C++ library target that can be used as a dependency of a `nanobind_extension`. Directly forwards its arguments to the `cc_library` rule.
 - `nanobind_shared_library`, a C++ shared library target that can be used to
 produce smaller objects in scenarios with multiple independent bindings extensions. Directly forwards its arguments to the `cc_shared_library` rule.
