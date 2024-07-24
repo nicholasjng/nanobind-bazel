@@ -8,9 +8,10 @@ from stubgen import main
 from python.runfiles import runfiles
 
 DEBUG = bool(os.getenv("DEBUG", False))
-
+RLOCATION_ROOT = Path("_main")  # the Python path root under the script's runfiles.
 
 def get_runfiles_dir(path: Union[str, os.PathLike]):
+    """Obtain the runfiles root from the Python script path."""
     ppath = Path(path)
     for p in ppath.parents:
         if p.parts[-1].endswith("runfiles"):
@@ -19,6 +20,11 @@ def get_runfiles_dir(path: Union[str, os.PathLike]):
 
 
 def get_bindir(path: Union[str, os.PathLike]):
+    """Obtain $(BINDIR) as an absolute path, from the current working directory.
+
+    NB: runfiles are not necessarily in the build tree on Windows,
+    so this needs to be deduced from the CWD of the script.
+    """
     ppath = Path(path)
     for p in ppath.parents:
         if p.parts[-1].endswith("bin"):
@@ -63,7 +69,7 @@ def wrapper():
     """
     script, *args = sys.argv
     runfiles_dir = get_runfiles_dir(script)
-    bindir = get_bindir(script)
+    bindir = get_bindir(os.getcwd())
     if DEBUG:
         print(f"runfiles_dir = {runfiles_dir}")
         print(f"bindir = {bindir}")
@@ -87,11 +93,14 @@ def wrapper():
         if (ext_path).is_symlink():
             # Path.readlink() is available on Python 3.9+ only.
             objfile = Path(os.readlink(ext_path))
-            stub_outpath = objfile.with_suffix("").with_suffix(".pyi")
-            if DEBUG:
-                print(f"stub_outpath = {stub_outpath}")
         else:
-            raise RuntimeError("could not locate original path to object file")
+            objfile = bindir / Path(fname).relative_to(RLOCATION_ROOT)
+            if not objfile.exists():
+                raise RuntimeError("could not locate original path to object file")
+
+        stub_outpath = objfile.with_suffix("").with_suffix(".pyi")
+        if DEBUG:
+            print(f"stub_outpath = {stub_outpath}")
 
         args.extend(["-o", str(stub_outpath)])
     else:

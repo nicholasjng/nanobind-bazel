@@ -153,7 +153,7 @@ def nanobind_stubgen(
         marker_file = None,
         include_private_members = False,
         exclude_docstrings = False):
-    """A stub file containing Python type annotations for a nanobind extension.
+    """Creates a stub file containing Python type annotations for a nanobind extension.
 
     Args:
         name: str
@@ -167,8 +167,8 @@ def nanobind_stubgen(
             as the module in your source tree.
         imports: list
             List of modules to import for stub generation.
-        pattern_file: str or None
-            Path to a pattern file used for programmatically editing generated stubs.
+        pattern_file: Label or None
+            Label of a pattern file used for programmatically editing generated stubs.
             For more information, consider the documentation under
             https://nanobind.readthedocs.io/en/latest/typing.html#pattern-files.
         marker_file: str or None
@@ -181,14 +181,20 @@ def nanobind_stubgen(
             Whether to exclude all docstrings of all module members from the generated
             stub file.
     """
-    # TODO: Expose envs and deps targets to allow marker and pattern files
-
-    NB_STUBGEN = Label("@nanobind//:stubgen")
     STUBGEN_WRAPPER = Label("@nanobind_bazel//:stubgen_wrapper.py")
     loc = "$(rlocationpath {})"
 
-    args = []
-    args.append("-m " + loc.format(module))
+    # stubgen wrapper dependencies: nanobind.stubgen, typing_extensions (via nanobind),
+    # rules_python runfiles (unused, needed later when giving an explicit output path)
+    deps = [
+        Label("@nanobind//:stubgen"),
+        Label("@pypi__typing_extensions//:lib"),
+        Label("@rules_python//python/runfiles"),
+    ]
+
+    data = [module]
+
+    args = ["-m " + loc.format(module)]
 
     # to be searchable by path expansion, a file must be
     # declared by a rule beforehand. This might not be the
@@ -196,8 +202,12 @@ def nanobind_stubgen(
     if output_file:
         args.append("-o {}".format(output_file))
 
-    # add pattern and marker files
+    # Add pattern and marker files.
+    # The pattern file must exist in the Bazel repo, so
+    # we pass its label to the py_binary's data dependencies.
+    # The marker file can be generated on the fly, however.
     if pattern_file:
+        data.append(pattern_file)
         args.append("-p " + loc.format(pattern_file))
     if marker_file:
         args.append("-M {}".format(marker_file))
@@ -211,12 +221,8 @@ def nanobind_stubgen(
         name = name,
         srcs = [STUBGEN_WRAPPER],
         main = STUBGEN_WRAPPER,
-        deps = [
-            Label("@pypi__typing_extensions//:lib"),
-            Label("@rules_python//python/runfiles"),
-            NB_STUBGEN,
-        ],
-        data = [module],
+        deps = deps,
+        data = data,
         imports = imports,
         args = args,
     )
