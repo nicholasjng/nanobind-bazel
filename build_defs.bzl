@@ -3,6 +3,8 @@ Build defs for nanobind.
 
 The ``nanobind_extension`` corresponds to a ``cc_binary``,
 the ``nanobind_library`` to a ``cc_library``,
+the ``nanobind_shared_library`` to a ``cc_shared_library``,
+the ``nanobind_stubgen`` to a ``py_binary``,
 and the ``nanobind_test`` to a ``cc_test``.
 
 For creating Python bindings, the most likely case is a ``nanobind_extension``
@@ -17,6 +19,7 @@ load(
     "nb_common_opts",
     "nb_sizeopts",
 )
+load("@rules_python//python:py_binary.bzl", "py_binary")
 
 NANOBIND_COPTS = nb_common_opts() + nb_sizeopts()
 NANOBIND_DEPS = [Label("@nanobind//:nanobind")]
@@ -139,6 +142,89 @@ def nanobind_shared_library(
         name = name,
         deps = deps + NANOBIND_DEPS,
         **kwargs
+    )
+
+def nanobind_stubgen(
+        name,
+        module,
+        output_file = None,
+        imports = [],
+        pattern_file = None,
+        marker_file = None,
+        include_private_members = False,
+        exclude_docstrings = False):
+    """Creates a stub file containing Python type annotations for a nanobind extension.
+
+    Args:
+        name: str
+            Name of this stub generation target, unused.
+        module: Label
+            Label of the extension module for which the stub file should be
+            generated.
+        output_file: str or None
+            Output file path for the generated stub, relative to $(BINDIR).
+            If none is given, the stub will be placed under the same location
+            as the module in your source tree.
+        imports: list
+            List of modules to import for stub generation.
+        pattern_file: Label or None
+            Label of a pattern file used for programmatically editing generated stubs.
+            For more information, consider the documentation under
+            https://nanobind.readthedocs.io/en/latest/typing.html#pattern-files.
+        marker_file: str or None
+            An empty typing marker file to add to the project, most often named
+            "py.typed". Must be given relative to your Python project root.
+        include_private_members: bool
+            Whether to include private module members, i.e. those starting and/or
+            ending with an underscore ("_").
+        exclude_docstrings: bool
+            Whether to exclude all docstrings of all module members from the generated
+            stub file.
+    """
+    STUBGEN_WRAPPER = Label("@nanobind_bazel//:stubgen_wrapper.py")
+    loc = "$(rlocationpath {})"
+
+    # stubgen wrapper dependencies: nanobind.stubgen, typing_extensions (via nanobind),
+    # rules_python runfiles (unused, needed later when giving an explicit output path)
+    deps = [
+        Label("@nanobind//:stubgen"),
+        Label("@pypi__typing_extensions//:lib"),
+        Label("@rules_python//python/runfiles"),
+    ]
+
+    data = [module]
+
+    args = ["-m " + loc.format(module)]
+
+    # to be searchable by path expansion, a file must be
+    # declared by a rule beforehand. This might not be the
+    # case for a generated stub, so we just give the raw name here
+    if output_file:
+        args.append("-o {}".format(output_file))
+
+    # Add pattern and marker files.
+    # The pattern file must exist in the Bazel repo, so
+    # we pass its label to the py_binary's data dependencies.
+    # The marker file can be generated on the fly, however.
+    if pattern_file:
+        data.append(pattern_file)
+        args.append("-p " + loc.format(pattern_file))
+    if marker_file:
+        args.append("-M {}".format(marker_file))
+
+    if include_private_members:
+        args.append("--include-private")
+    if exclude_docstrings:
+        args.append("--exclude-docstrings")
+
+    py_binary(
+        name = name,
+        srcs = [STUBGEN_WRAPPER],
+        main = STUBGEN_WRAPPER,
+        deps = deps,
+        data = data,
+        imports = imports,
+        args = args,
     )
 
 def nanobind_test(

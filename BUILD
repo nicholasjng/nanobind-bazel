@@ -6,6 +6,7 @@ licenses(["notice"])
 exports_files([
     "LICENSE",
     "pybind11_bazel.LICENSE",
+    "stubgen_wrapper.py",
 ])
 
 bool_flag(
