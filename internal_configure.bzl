@@ -22,7 +22,7 @@ def _internal_configure_extension_impl(_):
         name = "nanobind",
         build_file = "//:nanobind.BUILD",
         strip_prefix = "nanobind-%s" % nanobind_version,
-        # integrity = "sha256-LnBydITtt6hkXSb2qfZzUqZoZXw03npgO/nGjly/j/k=",
+        integrity = "sha256-v7/H5XWfFmnk3bSHUrHdxWR9FDDpRhTW+GJt8dUI5lo=",
         urls = ["https://github.com/wjakob/nanobind/archive/refs/tags/v%s.tar.gz" % nanobind_version],
     )
 
