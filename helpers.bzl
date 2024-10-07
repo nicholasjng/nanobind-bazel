@@ -55,7 +55,7 @@ def extension_name(name):
         "@nanobind_bazel//:unstable-abi-unix": name + ".so",
     })
 
-# Add a NB_FREE_THREADED define for free-threaded nanobind builds.
+# Optionally add a define for free-threaded nanobind builds.
 def nb_free_threading():
     return select({
         "@nanobind_bazel//:with_free_threading": ["NB_FREE_THREADED"],
