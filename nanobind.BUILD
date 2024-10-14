@@ -9,6 +9,7 @@ load(
     "@nanobind_bazel//:helpers.bzl",
     "maybe_compact_asserts",
     "nb_common_opts",
+    "nb_free_threading",
     "nb_sizeopts",
     "nb_stripopts",
     "py_limited_api",
@@ -29,7 +30,7 @@ cc_library(
         "//conditions:default": [],
     }),
     copts = nb_common_opts(mode = "library") + nb_sizeopts(),
-    defines = py_limited_api(),
+    defines = py_limited_api() + nb_free_threading(),
     includes = ["include"],
     linkopts = select({
         "@platforms//os:linux": ["-Wl,--gc-sections"],
