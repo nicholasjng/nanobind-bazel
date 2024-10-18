@@ -5,9 +5,8 @@ from pathlib import Path
 from typing import Union
 
 from stubgen import main
-from python.runfiles import runfiles
 
-DEBUG = bool(os.getenv("DEBUG", False))
+DEBUG = bool(os.getenv("DEBUG"))
 RLOCATION_ROOT = Path("_main")  # the Python path root under the script's runfiles.
 
 def get_runfiles_dir(path: Union[str, os.PathLike]):
@@ -90,7 +89,7 @@ def wrapper():
         ext_path = runfiles_dir / fname
         if DEBUG:
             print(f"ext_path = {ext_path}")
-        if (ext_path).is_symlink():
+        if ext_path.is_symlink():
             # Path.readlink() is available on Python 3.9+ only.
             objfile = Path(os.readlink(ext_path))
         else:
