@@ -1,6 +1,6 @@
 import os
 import sys
-
+import shutil
 from pathlib import Path
 from typing import Union
 
@@ -85,7 +85,9 @@ def wrapper():
            modname = convert_path_to_module(fname)
            args.insert(i + 1, modname)
 
-    if "-o" not in args:
+    if "-r" in args:
+        pass 
+    elif "-o" not in args:
         ext_path = runfiles_dir / fname
         if DEBUG:
             print(f"ext_path = {ext_path}")
@@ -114,6 +116,16 @@ def wrapper():
         args[idx + 1] = str(bindir / args[idx + 1])
 
     main(args)
+
+    if "-r" in args:
+        for root, _, filenames in os.walk(runfiles_dir):
+            for filename in filenames:
+                if Path(filename).suffix == ".pyi":
+                    rel_path = os.path.relpath(root, runfiles_dir)
+                    new_directory = Path(bindir) / rel_path
+                    os.makedirs(new_directory, exist_ok=True)
+                    shutil.copyfile(Path(root) / filename, new_directory / filename)
+                    
 
 
 if __name__ == "__main__":

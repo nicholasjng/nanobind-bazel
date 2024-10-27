@@ -152,7 +152,8 @@ def nanobind_stubgen(
         pattern_file = None,
         marker_file = None,
         include_private_members = False,
-        exclude_docstrings = False):
+        exclude_docstrings = False,
+        recursive = False):
     """Creates a stub file containing Python type annotations for a nanobind extension.
 
     Args:
@@ -180,6 +181,8 @@ def nanobind_stubgen(
         exclude_docstrings: bool
             Whether to exclude all docstrings of all module members from the generated
             stub file.
+        recursive: bool
+            Whether to perform stub generation on submodules as well.
     """
     STUBGEN_WRAPPER = Label("@nanobind_bazel//:stubgen_wrapper.py")
     loc = "$(rlocationpath {})"
@@ -196,6 +199,8 @@ def nanobind_stubgen(
 
     args = ["-m " + loc.format(module)]
 
+    if recursive:
+        args.append("-r")
     # to be searchable by path expansion, a file must be
     # declared by a rule beforehand. This might not be the
     # case for a generated stub, so we just give the raw name here
