@@ -86,7 +86,7 @@ def wrapper():
            args.insert(i + 1, modname)
 
     if "-r" in args:
-        pass 
+        pass
     elif "-o" not in args:
         ext_path = runfiles_dir / fname
         if DEBUG:
@@ -110,6 +110,15 @@ def wrapper():
         idx = args.index("-o")
         args[idx + 1] = str(bindir / args[idx + 1])
 
+    if "-O" in args:
+        # we have an output directory, use its path instead relative to $(BINDIR),
+        # but in absolute form.
+        idx = args.index("-O")
+        output_dir = args[idx + 1]
+        args[idx + 1] = str(bindir / args[idx + 1])
+    else:
+        output_dir = None
+
     if "-M" in args:
         # fix up the path to the marker file relative to $(BINDIR).
         idx = args.index("-M")
@@ -117,14 +126,11 @@ def wrapper():
 
     main(args)
 
-    if "-r" in args:
-        for root, _, filenames in os.walk(runfiles_dir):
-            for filename in filenames:
-                if Path(filename).suffix == ".pyi":
-                    rel_path = os.path.relpath(root, runfiles_dir)
-                    new_directory = Path(bindir) / rel_path
-                    os.makedirs(new_directory, exist_ok=True)
-                    shutil.copyfile(Path(root) / filename, new_directory / filename)
+    if "-O" in args:
+        # TODO: Not sure what is the best way to handle this, using the Nanobind Bazel example,
+        # the root stub looks like _main.src.nanobind_example.pyi...
+        shutil.move(Path(bindir) / f'{output_dir}/_main.{output_dir.replace("/", ".")}.pyi', Path(bindir) / f'{output_dir}/__init__.pyi')
+
                     
 
 

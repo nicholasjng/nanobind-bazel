@@ -148,6 +148,7 @@ def nanobind_stubgen(
         name,
         module,
         output_file = None,
+        output_directory = None,
         imports = [],
         pattern_file = None,
         marker_file = None,
@@ -201,6 +202,9 @@ def nanobind_stubgen(
 
     if recursive:
         args.append("-r")
+
+    if output_directory:
+        args.append("-O {}".format(output_directory))
     # to be searchable by path expansion, a file must be
     # declared by a rule beforehand. This might not be the
     # case for a generated stub, so we just give the raw name here
