@@ -207,6 +207,9 @@ def nanobind_stubgen(
     if recursive and output_file:
         fail("Cannot specify an output file if recursive stubgen is requested")
 
+    if recursive and not output_directory:
+        fail("Must specify an output directory for recursive stubgen")
+
     if recursive:
         args.append("-r")
 
