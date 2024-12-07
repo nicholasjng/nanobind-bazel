@@ -9,6 +9,7 @@ from stubgen import main
 DEBUG = bool(os.getenv("DEBUG"))
 RLOCATION_ROOT = Path("_main")  # the Python path root under the script's runfiles.
 
+
 def get_runfiles_dir(path: Union[str, os.PathLike]):
     """Obtain the runfiles root from the Python script path."""
     ppath = Path(path)
@@ -74,16 +75,16 @@ def wrapper():
         print(f"bindir = {bindir}")
     fname = ""
     for i, arg in enumerate(args):
-       if arg.startswith("-m"):
-           fname = args.pop(i + 1)
-           if not fname.endswith((".so", ".pyd")):
-               raise ValueError(
-                   f"invalid extension file {fname!r}: "
-                   "only shared object files with extensions "
-                   ".so, .abi3.so, or .pyd are supported"
-               )
-           modname = convert_path_to_module(fname)
-           args.insert(i + 1, modname)
+        if arg.startswith("-m"):
+            fname = args.pop(i + 1)
+            if not fname.endswith((".so", ".pyd")):
+                raise ValueError(
+                    f"invalid extension file {fname!r}: "
+                    "only shared object files with extensions "
+                    ".so, .abi3.so, or .pyd are supported"
+                )
+            modname = convert_path_to_module(fname)
+            args.insert(i + 1, modname)
 
     if "-r" in args:
         pass
@@ -111,13 +112,8 @@ def wrapper():
         args[idx + 1] = str(bindir / args[idx + 1])
 
     if "-O" in args:
-        # we have an output directory, use its path instead relative to $(BINDIR),
-        # but in absolute form.
         idx = args.index("-O")
-        output_dir = args[idx + 1]
         args[idx + 1] = str(bindir / args[idx + 1])
-    else:
-        output_dir = None
 
     if "-M" in args:
         # fix up the path to the marker file relative to $(BINDIR).
@@ -127,11 +123,11 @@ def wrapper():
     main(args)
 
     if "-O" in args:
-        # TODO: Not sure what is the best way to handle this, using the Nanobind Bazel example,
-        # the root stub looks like _main.src.nanobind_example.pyi...
-        shutil.move(Path(bindir) / f'{output_dir}/_main.{output_dir.replace("/", ".")}.pyi', Path(bindir) / f'{output_dir}/__init__.pyi')
-
-                    
+        from_path = os.path.join(
+            *modname.split(".")[1:-1], ".".join(modname.split(".")[:-1]) + ".pyi"
+        )
+        to_path = os.path.join(*modname.split(".")[1:]) + ".pyi"
+        shutil.move(bindir / from_path, bindir / to_path)
 
 
 if __name__ == "__main__":

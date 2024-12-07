@@ -167,6 +167,10 @@ def nanobind_stubgen(
             Output file path for the generated stub, relative to $(BINDIR).
             If none is given, the stub will be placed under the same location
             as the module in your source tree.
+        output_directory: str or None
+            Output directory for the generated stub, relative to $(BINDIR).
+            If none is given, the stub will be placed under the same location
+            as the module in your source tree.
         imports: list
             List of modules to import for stub generation.
         pattern_file: Label or None
@@ -200,11 +204,18 @@ def nanobind_stubgen(
 
     args = ["-m " + loc.format(module)]
 
+    if recursive and output_file:
+        fail("Cannot specify an output file if recursive stubgen is requested")
+
+    if recursive and not output_directory:
+        fail("Must specify an output directory for recursive stubgen")
+
     if recursive:
         args.append("-r")
 
     if output_directory:
         args.append("-O {}".format(output_directory))
+
     # to be searchable by path expansion, a file must be
     # declared by a rule beforehand. This might not be the
     # case for a generated stub, so we just give the raw name here
