@@ -111,8 +111,6 @@ def wrapper():
         args[idx + 1] = str(bindir / args[idx + 1])
 
     if "-O" in args:
-        # we have an output directory, use its path instead relative to $(BINDIR),
-        # but in absolute form.
         idx = args.index("-O")
         output_dir = args[idx + 1]
         args[idx + 1] = str(bindir / args[idx + 1])
