@@ -41,8 +41,6 @@ jobs:
         py: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
-        with:
-          path: nanobind-bazel
       - name: Set up Python ${{ matrix.py }} on ${{ matrix.os }}
         uses: actions/setup-python@v5
         with:
@@ -55,6 +53,8 @@ jobs:
           path: nanobind_example
           ref: bazel
 
+      - name: Override nanobind_bazel pin in MODULE.bazel
+        run: python fixup_module_bazel.py ${{ github.workspace}}/nanobind_example
       - name: Build and test nanobind_example on ${{ matrix.os }}
         run: |
           python -m build . -w
