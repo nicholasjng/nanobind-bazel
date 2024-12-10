@@ -50,7 +50,7 @@ def py_limited_api():
 # and stable ABI build yes/no.
 def extension_name(name):
     return select({
-        "@platforms//os:windows": name + ".pyd",
+        Label("@platforms//os:windows"): name + ".pyd",
         "@nanobind_bazel//:stable-abi-unix": name + ".abi3.so",
         "@nanobind_bazel//:unstable-abi-unix": name + ".so",
     })
