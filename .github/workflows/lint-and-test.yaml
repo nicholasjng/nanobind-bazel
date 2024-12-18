@@ -52,6 +52,8 @@ jobs:
           repository: wjakob/nanobind_example
           path: nanobind_example
           ref: bazel
+      - run: git apply ${{github.workspace }}/stubgen.patch
+        working-directory: ${{ github.workspace }}/nanobind_example
 
       - name: Override nanobind_bazel pin in MODULE.bazel
         run: python fixup_module_bazel.py ${{ github.workspace}}/nanobind_example
