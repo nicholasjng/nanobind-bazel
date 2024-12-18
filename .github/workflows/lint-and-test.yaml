@@ -34,7 +34,6 @@ jobs:
         uses: astral-sh/setup-uv@v4
         with:
           python-version: ${{ matrix.python-version }}
-          enable-cache: true
       - name: Check out nanobind example repo
         uses: actions/checkout@v4
         with:
