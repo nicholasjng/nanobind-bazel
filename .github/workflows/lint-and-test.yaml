@@ -47,15 +47,16 @@ jobs:
       - name: Override nanobind_bazel pin in MODULE.bazel
         run: python fixup_module_bazel.py ${{ github.workspace}}/nanobind_example
       - name: Build and test nanobind_example on ${{ matrix.os }}
+        # --no-sync is required so that uv does not remove the .so file again.
         run: |
           uv sync --no-editable
-          uv run python -c "import nanobind_example; assert nanobind_example.add(1, 2) == 3"
+          uv run --no-sync -- python -c "import nanobind_example; assert nanobind_example.add(1, 2) == 3"
         working-directory: ${{ github.workspace }}/nanobind_example
       - name: Check ${{ matrix.os }} CPython>=3.12 wheels for stable ABI violations
         if: matrix.python-version >= 3.12
         run: |
           uv pip install abi3audit
-          uv build --wheel -o dist
-          uv run -m abi3audit dist/*.whl --verbose --summary
+          uv build --wheel
+          uv run --no-sync abi3audit dist/*.whl --verbose --summary
         shell: bash
         working-directory: ${{ github.workspace }}/nanobind_example
