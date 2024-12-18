@@ -148,11 +148,13 @@ def nanobind_stubgen(
         name,
         module,
         output_file = None,
+        output_directory = None,
         imports = [],
         pattern_file = None,
         marker_file = None,
         include_private_members = False,
-        exclude_docstrings = False):
+        exclude_docstrings = False,
+        recursive = False):
     """Creates a stub file containing Python type annotations for a nanobind extension.
 
     Args:
@@ -163,6 +165,10 @@ def nanobind_stubgen(
             generated.
         output_file: str or None
             Output file path for the generated stub, relative to $(BINDIR).
+            If none is given, the stub will be placed under the same location
+            as the module in your source tree.
+        output_directory: str or None
+            Output directory for the generated stub, relative to $(BINDIR).
             If none is given, the stub will be placed under the same location
             as the module in your source tree.
         imports: list
@@ -180,6 +186,8 @@ def nanobind_stubgen(
         exclude_docstrings: bool
             Whether to exclude all docstrings of all module members from the generated
             stub file.
+        recursive: bool
+            Whether to perform stub generation on submodules as well.
     """
     STUBGEN_WRAPPER = Label("@nanobind_bazel//:stubgen_wrapper.py")
     loc = "$(rlocationpath {})"
@@ -195,6 +203,18 @@ def nanobind_stubgen(
     data = [module]
 
     args = ["-m " + loc.format(module)]
+
+    if recursive and output_file:
+        fail("Cannot specify an output file if recursive stubgen is requested")
+
+    if recursive and not output_directory:
+        fail("Must specify an output directory for recursive stubgen")
+
+    if recursive:
+        args.append("-r")
+
+    if output_directory:
+        args.append("-O {}".format(output_directory))
 
     # to be searchable by path expansion, a file must be
     # declared by a rule beforehand. This might not be the
