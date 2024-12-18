@@ -47,10 +47,13 @@ jobs:
         run: python fixup_module_bazel.py ${{ github.workspace}}/nanobind_example
       - name: Build and test nanobind_example on ${{ matrix.os }}
         run: |
+          uv venv --seed -p ${{ matrix.python-version }}
+          source .venv/bin/activate
           uv pip install build
           uv run -m build . -w
           uv pip install --find-links=dist/ nanobind_example
           python -c "import nanobind_example; assert nanobind_example.add(1, 2) == 3"
+        shell: bash
         working-directory: ${{ github.workspace }}/nanobind_example
       - name: Check ${{ matrix.os }} CPython>=3.12 wheels for stable ABI violations
         if: matrix.python-version >= 3.12
