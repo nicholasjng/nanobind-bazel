@@ -9,6 +9,12 @@ exports_files([
     "stubgen_wrapper.py",
 ])
 
+alias(
+    name = "nanobind",
+    actual = "@nanobind",
+    visibility = ["//visibility:public"],
+)
+
 bool_flag(
     name = "minsize",
     build_setting_default = True,
