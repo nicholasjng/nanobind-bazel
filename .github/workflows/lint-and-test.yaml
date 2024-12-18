@@ -17,7 +17,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v4
       - name: Run pre-commit checks
         run: uvx pre-commit run --all-files --verbose --show-diff-on-failure
   test:
@@ -31,9 +31,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
-      - name: Install Python ${{ matrix.python-version }}
-        run: uv python install ${{ matrix.python-version }}
+        uses: astral-sh/setup-uv@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
       - name: Check out nanobind example repo
         uses: actions/checkout@v4
         with:
@@ -48,16 +49,14 @@ jobs:
         run: python fixup_module_bazel.py ${{ github.workspace}}/nanobind_example
       - name: Build and test nanobind_example on ${{ matrix.os }}
         run: |
-          uv sync --no-install-project
-          uv build --wheel -o dist
-          uv pip install --no-index --find-links=dist/ nanobind_example
-          python -c "import nanobind_example; assert nanobind_example.add(1, 2) == 3"
-        shell: bash
+          uv sync --no-editable
+          uv run python -c "import nanobind_example; assert nanobind_example.add(1, 2) == 3"
         working-directory: ${{ github.workspace }}/nanobind_example
       - name: Check ${{ matrix.os }} CPython>=3.12 wheels for stable ABI violations
         if: matrix.python-version >= 3.12
         run: |
           uv pip install abi3audit
+          uv build --wheel -o dist
           uv run -m abi3audit dist/*.whl --verbose --summary
         shell: bash
         working-directory: ${{ github.workspace }}/nanobind_example
