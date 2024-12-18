@@ -27,7 +27,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [3.8, 3.9, 3.10, 3.11, 3.12, 3.13]
+        python-version: [3.8, 3.9, "3.10", 3.11, 3.12, 3.13]
     steps:
       - uses: actions/checkout@v4
       - name: Install uv
@@ -51,7 +51,7 @@ jobs:
           uv venv --seed -p ${{ matrix.python-version }}
           source .venv/bin/activate
           uv pip install build
-          uv run -m build . -w
+          uv run --no-editable -m build . -w
           uv pip install --find-links=dist/ nanobind_example
           python -c "import nanobind_example; assert nanobind_example.add(1, 2) == 3"
         shell: bash
