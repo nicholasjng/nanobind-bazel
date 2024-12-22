@@ -30,21 +30,6 @@ config_setting(
     flag_values = {":minsize": "False"},
 )
 
-bool_flag(
-    name = "free_threading",
-    build_setting_default = False,
-)
-
-config_setting(
-    name = "with_free_threading",
-    flag_values = {":free_threading": "True"},
-)
-
-config_setting(
-    name = "without_free_threading",
-    flag_values = {":free_threading": "False"},
-)
-
 string_flag(
     name = "py-limited-api",
     build_setting_default = "unset",
