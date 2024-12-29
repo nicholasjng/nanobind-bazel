@@ -50,7 +50,7 @@ def py_limited_api():
 # and stable ABI build yes/no.
 def extension_name(name):
     return select({
-        "@platforms//os:windows": name + ".pyd",
+        Label("@platforms//os:windows"): name + ".pyd",
         "@nanobind_bazel//:stable-abi-unix": name + ".abi3.so",
         "@nanobind_bazel//:unstable-abi-unix": name + ".so",
     })
@@ -58,6 +58,6 @@ def extension_name(name):
 # Optionally add a define for free-threaded nanobind builds.
 def nb_free_threading():
     return select({
-        "@nanobind_bazel//:with_free_threading": ["NB_FREE_THREADED"],
-        "@nanobind_bazel//:without_free_threading": [],
+        "@rules_python//python/config_settings:is_py_freethreaded": ["NB_FREE_THREADED"],
+        "//conditions:default": [],
     })

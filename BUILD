@@ -9,6 +9,12 @@ exports_files([
     "stubgen_wrapper.py",
 ])
 
+alias(
+    name = "nanobind",
+    actual = "@nanobind",
+    visibility = ["//visibility:public"],
+)
+
 bool_flag(
     name = "minsize",
     build_setting_default = True,
@@ -22,21 +28,6 @@ config_setting(
 config_setting(
     name = "without_sizeopts",
     flag_values = {":minsize": "False"},
-)
-
-bool_flag(
-    name = "free_threading",
-    build_setting_default = False,
-)
-
-config_setting(
-    name = "with_free_threading",
-    flag_values = {":free_threading": "True"},
-)
-
-config_setting(
-    name = "without_free_threading",
-    flag_values = {":free_threading": "False"},
 )
 
 string_flag(
