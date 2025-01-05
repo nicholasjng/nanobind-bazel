@@ -9,7 +9,7 @@ index 7723d4c..a15a36b 100644
 +bazel_dep(name = "nanobind_bazel", version = "")
 +local_path_override(
 +    module_name = "nanobind_bazel",
-+    path = "../nanobind-bazel",
++    path = "../",
 +)
  bazel_dep(name = "rules_python", version = "1.0.0")
  
