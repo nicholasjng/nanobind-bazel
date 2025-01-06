@@ -1,6 +1,6 @@
 import os
 import sys
-
+import shutil
 from pathlib import Path
 from typing import Union
 
@@ -8,6 +8,7 @@ from stubgen import main
 
 DEBUG = bool(os.getenv("DEBUG"))
 RLOCATION_ROOT = Path("_main")  # the Python path root under the script's runfiles.
+
 
 def get_runfiles_dir(path: Union[str, os.PathLike]):
     """Obtain the runfiles root from the Python script path."""
@@ -74,18 +75,20 @@ def wrapper():
         print(f"bindir = {bindir}")
     fname = ""
     for i, arg in enumerate(args):
-       if arg.startswith("-m"):
-           fname = args.pop(i + 1)
-           if not fname.endswith((".so", ".pyd")):
-               raise ValueError(
-                   f"invalid extension file {fname!r}: "
-                   "only shared object files with extensions "
-                   ".so, .abi3.so, or .pyd are supported"
-               )
-           modname = convert_path_to_module(fname)
-           args.insert(i + 1, modname)
+        if arg.startswith("-m"):
+            fname = args.pop(i + 1)
+            if not fname.endswith((".so", ".pyd")):
+                raise ValueError(
+                    f"invalid extension file {fname!r}: "
+                    "only shared object files with extensions "
+                    ".so, .abi3.so, or .pyd are supported"
+                )
+            modname = convert_path_to_module(fname)
+            args.insert(i + 1, modname)
 
-    if "-o" not in args:
+    if "-r" in args:
+        pass
+    elif "-o" not in args:
         ext_path = runfiles_dir / fname
         if DEBUG:
             print(f"ext_path = {ext_path}")
@@ -108,12 +111,23 @@ def wrapper():
         idx = args.index("-o")
         args[idx + 1] = str(bindir / args[idx + 1])
 
+    if "-O" in args:
+        idx = args.index("-O")
+        args[idx + 1] = str(bindir / args[idx + 1])
+
     if "-M" in args:
         # fix up the path to the marker file relative to $(BINDIR).
         idx = args.index("-M")
         args[idx + 1] = str(bindir / args[idx + 1])
 
     main(args)
+
+    if "-O" in args:
+        from_path = os.path.join(
+            *modname.split(".")[1:-1], ".".join(modname.split(".")[:-1]) + ".pyi"
+        )
+        to_path = os.path.join(*modname.split(".")[1:]) + ".pyi"
+        shutil.move(bindir / from_path, bindir / to_path)
 
 
 if __name__ == "__main__":
