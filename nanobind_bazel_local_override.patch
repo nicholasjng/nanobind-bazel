@@ -14,16 +14,3 @@ index 7723d4c..a15a36b 100644
  bazel_dep(name = "rules_python", version = "1.0.0")
  
  python = use_extension("@rules_python//python/extensions:python.bzl", "python")
-diff --git a/src/BUILD b/src/BUILD
-index 5562dca..95e210e 100644
---- a/src/BUILD
-+++ b/src/BUILD
-@@ -20,6 +20,6 @@ nanobind_stubgen(
-     name = "nanobind_example_ext_stubgen",
-     module = ":nanobind_example_ext",
-     marker_file = "src/py.typed",
--    output_directory = "src",
--    recursive = True,
-+#    output_directory = "src",
-+#    recursive = True,
- )
