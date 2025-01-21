@@ -43,6 +43,7 @@ def py_limited_api():
     return select({
         "@nanobind_bazel//:cp312": ["Py_LIMITED_API=0x030C0000"],
         "@nanobind_bazel//:cp313": ["Py_LIMITED_API=0x030D0000"],
+        "@nanobind_bazel//:cp314": ["Py_LIMITED_API=0x030E0000"],
         "@nanobind_bazel//:pyunlimitedapi": [],
     })
 
