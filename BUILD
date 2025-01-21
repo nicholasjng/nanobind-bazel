@@ -36,6 +36,7 @@ string_flag(
     values = [
         "cp312",
         "cp313",
+        "cp314",
         "unset",
     ],
 )
@@ -48,6 +49,11 @@ config_setting(
 config_setting(
     name = "cp313",
     flag_values = {":py-limited-api": "cp313"},
+)
+
+config_setting(
+    name = "cp314",
+    flag_values = {":py-limited-api": "cp314"},
 )
 
 config_setting(
