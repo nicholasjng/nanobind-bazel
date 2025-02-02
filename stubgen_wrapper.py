@@ -122,13 +122,6 @@ def wrapper():
 
     main(args)
 
-    if "-O" in args:
-        from_path = os.path.join(
-            *modname.split(".")[1:-1], ".".join(modname.split(".")[:-1]) + ".pyi"
-        )
-        to_path = os.path.join(*modname.split(".")[1:]) + ".pyi"
-        shutil.move(bindir / from_path, bindir / to_path)
-
 
 if __name__ == "__main__":
     wrapper()
