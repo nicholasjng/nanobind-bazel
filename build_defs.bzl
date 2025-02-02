@@ -19,6 +19,7 @@ load(
     "nb_common_opts",
     "nb_sizeopts",
 )
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 load("@rules_python//python:py_binary.bzl", "py_binary")
 
 NANOBIND_COPTS = nb_common_opts() + nb_sizeopts()
@@ -68,8 +69,7 @@ def nanobind_extension(
         NANOBIND_DOMAIN = ["NB_DOMAIN={}".format(domain)]
     else:
         NANOBIND_DOMAIN = []
-
-    native.cc_binary(
+    cc_binary(
         name = name + ".so",
         srcs = srcs,
         copts = copts + NANOBIND_COPTS,
@@ -107,7 +107,7 @@ def nanobind_library(
         copts = [],
         deps = [],
         **kwargs):
-    native.cc_library(
+    cc_library(
         name = name,
         copts = copts + NANOBIND_COPTS,
         deps = deps + NANOBIND_DEPS,
@@ -252,7 +252,7 @@ def nanobind_test(
         copts = [],
         deps = [],
         **kwargs):
-    native.cc_test(
+    cc_test(
         name = name,
         copts = copts + NANOBIND_COPTS,
         deps = deps + NANOBIND_DEPS,

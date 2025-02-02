@@ -14,6 +14,8 @@ load(
     "nb_stripopts",
     "py_limited_api",
 )
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_python//python:defs.bzl", "py_library")
 
 licenses(["notice"])
 
