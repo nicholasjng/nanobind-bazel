@@ -1,11 +1,11 @@
 diff --git a/MODULE.bazel b/MODULE.bazel
-index d2d46c5..a15a36b 100644
+index 1128b13..a15a36b 100644
 --- a/MODULE.bazel
 +++ b/MODULE.bazel
 @@ -1,6 +1,10 @@
  module(name = "nanobind_example", version = "0.1.0")
  
--bazel_dep(name = "nanobind_bazel", version = "2.5.0")
+-bazel_dep(name = "nanobind_bazel", version = "2.6.1")
 +bazel_dep(name = "nanobind_bazel", version = "")
 +local_path_override(
 +    module_name = "nanobind_bazel",
