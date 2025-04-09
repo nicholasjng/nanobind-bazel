@@ -19,6 +19,7 @@ load(
     "nb_common_opts",
     "nb_sizeopts",
 )
+load("@rules_cc//cc:cc_shared_library.bzl", "cc_shared_library")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 load("@rules_python//python:py_binary.bzl", "py_binary")
 
@@ -138,7 +139,7 @@ def nanobind_shared_library(
             rule. For a comprehensive list, see the Bazel documentation at
             https://bazel.build/reference/be/c-cpp#cc_shared_library.
     """
-    native.cc_shared_library(
+    cc_shared_library(
         name = name,
         deps = deps + NANOBIND_DEPS,
         **kwargs
