@@ -12,6 +12,7 @@ built using the C++ source files containing the nanobind module definition,
 which can then be included e.g. as a `data` input in a ``native.py_library``.
 """
 
+load("@bazel_skylib//lib:versions.bzl", "versions")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load(
     "@nanobind_bazel//:helpers.bzl",
@@ -144,6 +145,36 @@ def nanobind_shared_library(
         deps = deps + NANOBIND_DEPS,
         **kwargs
     )
+
+def nanobind_static_library(
+        name,
+        deps = [],
+        **kwargs):
+    """A single static library with nanobind as a static dependency.
+
+    Requires Bazel 7.4.0 or greater to use, as well as setting the
+    `--experimental_cc_static_library` flag for the build.
+
+    Args:
+    name: str
+        A name for this target.
+    deps: list
+        A list of dependencies for this static library. By default,
+        a statically built nanobind is included.
+    **kwargs: Any
+        Additional keyword arguments to be passed directly to the
+        `native.cc_static_library` rule.
+        For a comprehensive list, see the Bazel documentation at
+        https://bazel.build/reference/be/c-cpp#cc_static_library.
+    """
+    if not versions.is_at_least("7.4.0", native.bazel_version):
+        fail("`nanobind_static_library` requires Bazel 7.4.0 or newer")
+
+    # TODO(nicholasjng): Source this from rules_cc once it graduates
+    # out of experimental status, or once the minimum required rules_cc
+    # version is recent enough, see
+    # https://github.com/bazelbuild/rules_cc/commit/b1c049c65c7ffa4dfa175e29b6af75d5e08486d5.
+    native.cc_static_library(name = name, deps = deps + NANOBIND_DEPS, **kwargs)
 
 def nanobind_stubgen(
         name,
