@@ -12,7 +12,6 @@ built using the C++ source files containing the nanobind module definition,
 which can then be included e.g. as a `data` input in a ``native.py_library``.
 """
 
-load("@bazel_skylib//lib:versions.bzl", "versions")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load(
     "@nanobind_bazel//:helpers.bzl",
@@ -167,7 +166,7 @@ def nanobind_static_library(
         For a comprehensive list, see the Bazel documentation at
         https://bazel.build/reference/be/c-cpp#cc_static_library.
     """
-    if not versions.is_at_least("7.4.0", native.bazel_version):
+    if "cc_static_library" not in dir(native):
         fail("`nanobind_static_library` requires Bazel 7.4.0 or newer")
 
     # TODO(nicholasjng): Source this from rules_cc once it graduates
