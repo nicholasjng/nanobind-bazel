@@ -17,12 +17,12 @@ def _internal_configure_extension_impl(_):
         urls = ["https://github.com/Tessil/robin-map/archive/refs/tags/v%s.tar.gz" % robin_map_version],
     )
 
-    nanobind_version = "2.6.1"
+    nanobind_version = "2.7.0"
     http_archive(
         name = "nanobind",
         build_file = "//:nanobind.BUILD",
         strip_prefix = "nanobind-%s" % nanobind_version,
-        integrity = "sha256-UZxt1WWBrW25qrgUEFwmZqBJEJZIfLOE3SAhb4DRopE=",
+        integrity = "sha256-bIxr8ENbnY2pMSgBaGr/zzS227oULbYP7sjY4iCDBJk=",
         urls = ["https://github.com/wjakob/nanobind/archive/refs/tags/v%s.tar.gz" % nanobind_version],
     )
 
