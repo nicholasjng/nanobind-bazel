@@ -4,12 +4,13 @@ Build defs for nanobind.
 The ``nanobind_extension`` corresponds to a ``cc_binary``,
 the ``nanobind_library`` to a ``cc_library``,
 the ``nanobind_shared_library`` to a ``cc_shared_library``,
+the ``nanobind_static_library`` to a ``cc_static_library``,
 the ``nanobind_stubgen`` to a ``py_binary``,
 and the ``nanobind_test`` to a ``cc_test``.
 
 For creating Python bindings, the most likely case is a ``nanobind_extension``
 built using the C++ source files containing the nanobind module definition,
-which can then be included e.g. as a `data` input in a ``native.py_library``.
+which can then be included e.g. as a `data` input in a ``py_library``.
 """
 
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
