@@ -129,6 +129,7 @@ selects.config_setting_group(
         ":cp313",
         ":cp314",
     ],
+    visibility = ["//visibility:public"],
 )
 
 # A stable ABI build on Linux or Mac.
@@ -139,6 +140,7 @@ selects.config_setting_group(
         ":stable-abi",
         ":unix",
     ],
+    visibility = ["//visibility:public"],
 )
 
 # An unlimited Python ABI build on Linux or Mac. Produces a regular .so file.
@@ -148,6 +150,7 @@ selects.config_setting_group(
         ":pyunlimitedapi",
         ":unix",
     ],
+    visibility = ["//visibility:public"],
 )
 
 # Is the currently configured C++ compiler not MSVC?
@@ -159,6 +162,7 @@ selects.config_setting_group(
         "@rules_cc//cc/compiler:clang-cl",
         "@rules_cc//cc/compiler:mingw-gcc",
     ],
+    visibility = ["//visibility:public"],
 )
 
 selects.config_setting_group(
