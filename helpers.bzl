@@ -6,6 +6,7 @@ def nb_common_opts(mode = "user"):
         "-fvisibility=hidden",
         "-fno-strict-aliasing",
         "-fexceptions",
+        "-frtti",
     ]
 
     if mode == "user":
