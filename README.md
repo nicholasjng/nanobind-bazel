@@ -10,6 +10,7 @@ These extensions can be used e.g. as a `data` dependency for a `py_library` targ
 - `nanobind_library`, a C++ library target that can be used as a dependency of a `nanobind_extension`. Directly forwards its arguments to the `cc_library` rule.
 - `nanobind_shared_library`, a C++ shared library target that can be used to
 produce smaller objects in scenarios with multiple independent bindings extensions. Directly forwards its arguments to the `cc_shared_library` rule.
+- `nanobind_static_library`, a C++ static library with nanobind as a dependency. Currently experimental because the underlying `cc_static_library` is considered experimental.
 - `nanobind_test`, a C++ test for a `nanobind_library`. Forwards its argument to a `cc_test`.
 
 Each target is given nanobind's specific build flags, optimizations and dependencies.
@@ -21,7 +22,7 @@ nanobind-bazel is published to the Bazel Central Registry (BCR). To use it, spec
 ```
 # the major version of nanobind-bazel is equal to the major version of the internally used nanobind.
 # In this case, we are building bindings with nanobind@v2.
-bazel_dep(name = "nanobind_bazel", version = "2.0.0")
+bazel_dep(name = "nanobind_bazel", version = "2.8.0")
 ```
 
 To instead use a development version, you can declare a `git_override()` dependency in your MODULE.bazel:
@@ -47,7 +48,8 @@ local_path_override(
 
 ## Bazel versions
 
-This library relies on the ability to pass inputs to the linker in `cc_library` targets, which became available starting in Bazel 6.4.0. For this reason, the minimum Bazel version compatible with this project is Bazel 6.4.0.
+This library relies on the ability to pass inputs to the linker in `cc_library` targets, which became available starting in Bazel 6.4.0. 
+Since the release of Bazel 8, the minimum Bazel version compatible with this project is Bazel 7.0.0.
 
 In general, since Bazel 7 enabled bzlmod by default, no more intentional development efforts are made to support the workspace system.
 
