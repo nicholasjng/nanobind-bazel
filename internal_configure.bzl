@@ -17,22 +17,22 @@ def _internal_configure_extension_impl(_):
         urls = ["https://github.com/Tessil/robin-map/archive/refs/tags/v%s.tar.gz" % robin_map_version],
     )
 
-    nanobind_version = "2.8.0"
+    nanobind_version = "2.9.2"
     http_archive(
         name = "nanobind",
         build_file = "//:nanobind.BUILD",
         strip_prefix = "nanobind-%s" % nanobind_version,
-        integrity = "sha256-F1BvHvXJJJEYOrKCQvpPZY2WJf5PkczR0TWMtuX1rLY=",
+        integrity = "sha256-jONmfc4+ZPwGv7m3eLb0hzFII2L7iaQ9oVZjImbNWpA=",
         urls = ["https://github.com/wjakob/nanobind/archive/refs/tags/v%s.tar.gz" % nanobind_version],
     )
 
-    typing_extensions_version = "4.13.2"
+    typing_extensions_version = "4.15.0"
     http_archive(
         name = "pypi__typing_extensions",
         build_file = "//:typing_extensions.BUILD",
         strip_prefix = "typing_extensions-%s" % typing_extensions_version,
-        integrity = "sha256-5sgSGb1on1GGXZ43KZHFQL2jOgN51Vc83bmjoj98qu8=",
-        urls = ["https://files.pythonhosted.org/packages/f6/37/23083fcd6e35492953e8d2aaaa68b860eb422b34627b13f2ce3eb6106061/typing_extensions-%s.tar.gz" % typing_extensions_version],
+        integrity = "sha256-DOpI0XPMEvoo7KvDuDfqPPbzjG0RNvhcuq9ZiYSGFGY=",
+        urls = ["https://files.pythonhosted.org/packages/72/94/1a15dd82efb362ac84269196e94cf00f187f7ed21c242792a923cdb1c61f/typing_extensions-%s.tar.gz" % typing_extensions_version],
     )
 
 internal_configure_extension = module_extension(implementation = _internal_configure_extension_impl)
