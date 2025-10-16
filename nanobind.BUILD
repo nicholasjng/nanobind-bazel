@@ -16,6 +16,7 @@ load(
 )
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@rules_python//python:defs.bzl", "py_library")
+load("@rules_python//python:features.bzl", "features")
 
 licenses(["notice"])
 
@@ -50,10 +51,14 @@ cc_library(
             "src/*.h",
         ],
     ),
-    deps = [
-        "@robin_map",
-        "@rules_python//python/cc:current_py_cc_headers",
-    ],
+    deps = ["@robin_map"] + select(
+        {
+            "@nanobind_bazel//:stable-abi": [
+                "@rules_python//python/cc:current_py_cc_headers_abi3" if getattr(features, "headers_abi3", False) else "@rules_python//python/cc:current_py_cc_headers",
+            ],
+            "//conditions:default": ["@rules_python//python/cc:current_py_cc_headers"],
+        },
+    ),
 )
 
 py_library(
