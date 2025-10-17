@@ -60,12 +60,14 @@ As I have used some of the code from that repository, its [license](pybind11_baz
 
 In contrast to that project, though, nanobind does not support Python interpreter embedding, and endorses a few more size-related optimizations which I have included here.
 
-## Roadmap
+## Known issues
 
-- [x] First successful test, e.g. on wjakob's [nanobind example](https://github.com/wjakob/nanobind_example).
-- [x] A BCR release.
-- [x] A `nanobind_shared_library` target for a `cc_shared_library` using (lib)nanobind.
-- [ ] Supporting custom nanobind build targets instead of the internal one.
+* Stable ABI extension builds (i.e., those with `Py_LIMITED_API` defined and set to a target Python version) on Windows are linked incorrectly on `nanobind_bazel <= 2.9.2`.
+
+This is because of a bug in a `rules_python` header target, which links against a wrong `.lib` file on Windows in the stable ABI case, leading to DLL version mismatches when attempting to load such an extension in a Python interpreter different from the one used to build the extension.
+
+To build nanobind extensions on Windows targeting the stable ABI, you must also upgrade to `rules_python >= 1.7.0`, which contains the fix.
+For more information about linking Python extensions on Windows, you can refer to [this pull request](https://github.com/bazel-contrib/rules_python/pull/3274) and the comments therein.
 
 ## Contributing
 
