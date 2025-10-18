@@ -6,7 +6,7 @@ Here's the full list of exported rules:
 
 - `nanobind_extension`, building a Python extension containing the bindings as a `*.so` file.
 These extensions can be used e.g. as a `data` dependency for a `py_library` target.
-- `nanobind_stubgen`, a rule pointing to a `py_binary` to create a Python stub file from a previously built `nanobind_extension`. (Available only with nanobind>=v2.0.0.)
+- `nanobind_stubgen`, a rule pointing to a `py_binary` to create a Python stub file from a previously built `nanobind_extension`. (Available only with `nanobind>=2.0.0`.)
 - `nanobind_library`, a C++ library target that can be used as a dependency of a `nanobind_extension`. Directly forwards its arguments to the `cc_library` rule.
 - `nanobind_shared_library`, a C++ shared library target that can be used to
 produce smaller objects in scenarios with multiple independent bindings extensions. Directly forwards its arguments to the `cc_shared_library` rule.
@@ -20,8 +20,8 @@ Each target is given nanobind's specific build flags, optimizations and dependen
 nanobind-bazel is published to the Bazel Central Registry (BCR). To use it, specify it as a `bazel_dep`:
 
 ```
-# the major version of nanobind-bazel is equal to the major version of the internally used nanobind.
-# In this case, we are building bindings with nanobind@v2.
+# the version of nanobind-bazel is exactly equal to the version of the internally used nanobind.
+# In this case, we are building bindings with nanobind==2.9.2.
 bazel_dep(name = "nanobind_bazel", version = "2.9.2")
 ```
 
@@ -62,11 +62,13 @@ In contrast to that project, though, nanobind does not support Python interprete
 
 ## Known issues
 
-* Stable ABI extension builds (i.e., those with `Py_LIMITED_API` defined and set to a target Python version) on Windows are linked incorrectly on `nanobind_bazel <= 2.9.2`.
+### Stable ABI extension builds on Windows
 
-This is because of a bug in a `rules_python` header target, which links against a wrong `.lib` file on Windows in the stable ABI case, leading to DLL version mismatches when attempting to load such an extension in a Python interpreter different from the one used to build the extension.
+Stable ABI extensions (i.e., those with `Py_LIMITED_API` defined and set to a target Python version) on Windows are linked incorrectly on `nanobind_bazel<=2.9.2`.
 
-To build nanobind extensions on Windows targeting the stable ABI, you must also upgrade to `rules_python >= 1.7.0`, which contains the fix.
+This is because of a bug in a `rules_python` header target, which links against the wrong `.lib` file on Windows in the stable ABI case, leading to DLL version mismatches when attempting to load such an extension into a Python interpreter different from the one used to build the extension.
+
+To build nanobind extensions on Windows targeting the stable ABI, you must also upgrade to `rules_python>=1.7.0`, which contains the fix.
 For more information about linking Python extensions on Windows, you can refer to [this pull request](https://github.com/bazel-contrib/rules_python/pull/3274) and the comments therein.
 
 ## Contributing
