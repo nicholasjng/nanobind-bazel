@@ -186,6 +186,7 @@ def nanobind_stubgen(
         marker_file = None,
         include_private_members = False,
         exclude_docstrings = False,
+        exclude_values = False,
         recursive = False):
     """Creates a stub file containing Python type annotations for a nanobind extension.
 
@@ -218,6 +219,8 @@ def nanobind_stubgen(
         exclude_docstrings: bool
             Whether to exclude all docstrings of all module members from the generated
             stub file.
+        exclude_values: bool
+            Whether to replace all constants with a Python ellipsis placeholder.
         recursive: bool
             Whether to perform stub generation on submodules as well.
     """
@@ -268,6 +271,8 @@ def nanobind_stubgen(
         args.append("--include-private")
     if exclude_docstrings:
         args.append("--exclude-docstrings")
+    if exclude_values:
+        args.append("--exclude-values")
 
     py_binary(
         name = name,
