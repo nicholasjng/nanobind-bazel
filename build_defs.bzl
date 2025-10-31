@@ -187,6 +187,7 @@ def nanobind_stubgen(
         include_private_members = False,
         exclude_docstrings = False,
         exclude_values = False,
+        quiet = False,
         recursive = False):
     """Creates a stub file containing Python type annotations for a nanobind extension.
 
@@ -221,6 +222,8 @@ def nanobind_stubgen(
             stub file.
         exclude_values: bool
             Whether to replace all constants with a Python ellipsis placeholder.
+        quiet: bool
+            Whether to suppress output of the stubgen script.
         recursive: bool
             Whether to perform stub generation on submodules as well.
     """
@@ -273,6 +276,8 @@ def nanobind_stubgen(
         args.append("--exclude-docstrings")
     if exclude_values:
         args.append("--exclude-values")
+    if quiet:
+        args.append("-q")
 
     py_binary(
         name = name,
