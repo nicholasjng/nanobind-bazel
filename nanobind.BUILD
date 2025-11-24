@@ -44,7 +44,10 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + nb_stripopts(),
-    local_defines = maybe_compact_asserts(),
+    local_defines = [
+        "NB_BUILD=1",
+        "NB_SHARED=1",
+    ] + maybe_compact_asserts(),
     textual_hdrs = glob(
         [
             "include/**/*.h",
