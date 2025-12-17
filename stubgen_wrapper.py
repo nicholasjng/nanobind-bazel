@@ -39,7 +39,7 @@ def convert_path_to_module(path: Union[str, os.PathLike]):
     Example:
         For a shared lib pkg/foo.so, this returns pkg.foo.
     """
-    pp = Path(path).relative_to(RLOCATION_ROOT)
+    pp = Path(path)
     # this trick strips up to two extensions from the file name.
     # Since possible extensions at this point are
     # .so, .abi3.so, and .pyd, this path always gives us the
