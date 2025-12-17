@@ -14,6 +14,7 @@ load(
     "nb_stripopts",
     "py_limited_api",
 )
+load("@rules_cc//cc:cc_shared_library.bzl", "cc_shared_library")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@rules_python//python:defs.bzl", "py_library")
 load("@rules_python//python:features.bzl", "features")
@@ -59,6 +60,54 @@ cc_library(
             "//conditions:default": ["@rules_python//python/cc:current_py_cc_headers"],
         },
     ),
+)
+
+cc_library(
+    name = "nanobind_shared",
+    srcs = glob(
+        include = ["src/*.cpp"],
+        exclude = ["src/nb_combined.cpp"],
+    ),
+    hdrs = glob(
+        [
+            "include/**/*.h",
+            "src/*.h",
+        ],
+    ),
+    additional_linker_inputs = select({
+        "@platforms//os:macos": [":cmake/darwin-ld-cpython.sym"],
+        "//conditions:default": [],
+    }),
+    copts = nb_common_opts(mode = "library") + nb_sizeopts(),
+    defines = py_limited_api() + nb_free_threading(),
+    includes = ["include"],
+    linkopts = select({
+        "@platforms//os:linux": ["-Wl,--gc-sections"],
+        "@platforms//os:macos": [
+            # chained fixups on Apple platforms.
+            "-Wl,@$(location :cmake/darwin-ld-cpython.sym)",
+            "-Wl,-dead_strip",
+        ],
+        "//conditions:default": [],
+    }) + nb_stripopts(),
+    local_defines = [
+        "NB_BUILD=1",
+        "NB_SHARED=1",
+    ] + maybe_compact_asserts(),
+    deps = ["@robin_map"] + select(
+        {
+            "@nanobind_bazel//:stable-abi": [
+                "@rules_python//python/cc:current_py_cc_headers_abi3" if getattr(features, "headers_abi3", False) else "@rules_python//python/cc:current_py_cc_headers",
+            ],
+            "//conditions:default": ["@rules_python//python/cc:current_py_cc_headers"],
+        },
+    ),
+)
+
+cc_shared_library(
+    name = "libnanobind",
+    shared_lib_name = "libnanobind.so",
+    deps = [":nanobind_shared"],
 )
 
 py_library(

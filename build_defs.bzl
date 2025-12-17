@@ -25,7 +25,9 @@ load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 load("@rules_python//python:py_binary.bzl", "py_binary")
 
 NANOBIND_COPTS = nb_common_opts() + nb_sizeopts()
-NANOBIND_DEPS = [Label("@nanobind//:nanobind")]
+NANOBIND_STATIC = [Label("@nanobind//:nanobind")]
+NANOBIND_SHARED = [Label("@nanobind//:nanobind_shared")]
+LIBNANOBIND = [Label("@nanobind//:libnanobind")]
 
 def nanobind_extension(
         name,
@@ -33,6 +35,8 @@ def nanobind_extension(
         srcs = [],
         copts = [],
         deps = [],
+        dynamic_deps = [],
+        linkstatic = True,
         local_defines = [],
         **kwargs):
     """A C++ Python extension library built with nanobind.
@@ -60,24 +64,37 @@ def nanobind_extension(
             compiler optimizations by default.
         deps: list
             A list of dependencies of this extension.
+        dynamic_deps: list
+            A list of shared library dependencies of the extension.
+            Augmented by `libnanobind.so` if linkstatic is set to `False`.
+        linkstatic: bool
+            Whether to link the extension in static mode.
+            Additionally, setting this to `False` means the library will be linked
+            against `libnanobind.so`.
         local_defines: list
             A list of preprocessor defines to set for this target.
-            Augmented with -DNB_DOMAIN=$DOMAIN if the domain argument is given.
+            Augmented with `-DNB_DOMAIN=$DOMAIN` if the domain argument is given.
         **kwargs: Any
-            Keyword arguments matching the cc_binary rule arguments, to be passed
-            directly to the resulting cc_binary target.
+            Keyword arguments matching the `cc_binary` rule arguments, to be passed
+            directly to the resulting `cc_binary` target.
     """
     if domain != "":
         NANOBIND_DOMAIN = ["NB_DOMAIN={}".format(domain)]
     else:
         NANOBIND_DOMAIN = []
+
+    NANOBIND = NANOBIND_STATIC if linkstatic else NANOBIND_SHARED
+    NB_DYNDEPS = LIBNANOBIND if not linkstatic else []
+
     cc_binary(
         name = name + ".so",
         srcs = srcs,
         copts = copts + NANOBIND_COPTS,
-        deps = deps + NANOBIND_DEPS,
+        deps = deps + NANOBIND,
         local_defines = local_defines + NANOBIND_DOMAIN,
         linkshared = True,  # Python extensions need to be shared libs.
+        linkstatic = linkstatic,
+        dynamic_deps = dynamic_deps + NB_DYNDEPS,
         **kwargs
     )
 
@@ -112,7 +129,7 @@ def nanobind_library(
     cc_library(
         name = name,
         copts = copts + NANOBIND_COPTS,
-        deps = deps + NANOBIND_DEPS,
+        deps = deps + NANOBIND_STATIC,
         **kwargs
     )
 
@@ -142,7 +159,7 @@ def nanobind_shared_library(
     """
     cc_shared_library(
         name = name,
-        deps = deps + NANOBIND_DEPS,
+        deps = deps + NANOBIND_STATIC,
         **kwargs
     )
 
@@ -174,7 +191,7 @@ def nanobind_static_library(
     # out of experimental status, or once the minimum required rules_cc
     # version is recent enough, see
     # https://github.com/bazelbuild/rules_cc/commit/b1c049c65c7ffa4dfa175e29b6af75d5e08486d5.
-    native.cc_static_library(name = name, deps = deps + NANOBIND_DEPS, **kwargs)
+    native.cc_static_library(name = name, deps = deps + NANOBIND_STATIC, **kwargs)
 
 def nanobind_stubgen(
         name,
@@ -297,6 +314,6 @@ def nanobind_test(
     cc_test(
         name = name,
         copts = copts + NANOBIND_COPTS,
-        deps = deps + NANOBIND_DEPS,
+        deps = deps + NANOBIND_STATIC,
         **kwargs
     )
