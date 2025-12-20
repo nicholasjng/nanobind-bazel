@@ -11,7 +11,19 @@ exports_files([
 
 alias(
     name = "nanobind",
-    actual = "@nanobind",
+    actual = "@nanobind//:nanobind",
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "nanobind_shared",
+    actual = "@nanobind//:nanobind_shared",
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "libnanobind",
+    actual = "@nanobind//:libnanobind",
     visibility = ["//visibility:public"],
 )
 
