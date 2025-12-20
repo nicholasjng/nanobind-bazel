@@ -8,15 +8,6 @@ and patch the version and integrity parameter of the `http_archive`s below.
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 def _internal_configure_extension_impl(_):
-    robin_map_version = "1.4.0"
-    http_archive(
-        name = "robin_map",
-        build_file = "//:robin_map.BUILD",
-        strip_prefix = "robin-map-%s" % robin_map_version,
-        integrity = "sha256-eTDb+WNKz8Amhth/YVwPTzMTWUgTC4kiMxwW2QoDJQw=",
-        urls = ["https://github.com/Tessil/robin-map/archive/refs/tags/v%s.tar.gz" % robin_map_version],
-    )
-
     nanobind_version = "2.9.2"
     http_archive(
         name = "nanobind",

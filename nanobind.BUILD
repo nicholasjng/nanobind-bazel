@@ -45,7 +45,7 @@ cc_library(
             "src/*.h",
         ],
     ),
-    deps = ["@robin_map"] + select(
+    deps = ["@robin-map//:robin-map"] + select(
         {
             "@nanobind_bazel//:stable-abi": [
                 "@rules_python//python/cc:current_py_cc_headers_abi3" if getattr(features, "headers_abi3", False) else "@rules_python//python/cc:current_py_cc_headers",
@@ -79,7 +79,7 @@ cc_library(
         "NB_BUILD=1",
         "NB_SHARED=1",
     ] + maybe_compact_asserts(),
-    deps = ["@robin_map"] + select(
+    deps = ["@robin-map//:robin-map"] + select(
         {
             "@nanobind_bazel//:stable-abi": [
                 "@rules_python//python/cc:current_py_cc_headers_abi3" if getattr(features, "headers_abi3", False) else "@rules_python//python/cc:current_py_cc_headers",
