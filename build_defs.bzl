@@ -37,6 +37,7 @@ def nanobind_extension(
         deps = [],
         dynamic_deps = [],
         linkstatic = True,
+        nanobind_link_mode = "auto",
         local_defines = [],
         **kwargs):
     """A C++ Python extension library built with nanobind.
@@ -66,11 +67,16 @@ def nanobind_extension(
             A list of dependencies of this extension.
         dynamic_deps: list
             A list of shared library dependencies of the extension.
-            Augmented by `libnanobind.so` if linkstatic is set to `False`.
+            Augmented by `libnanobind.so` if linkstatic is set to `False`, or if
+            `nanobind_link_mode = "shared"`.
         linkstatic: bool
             Whether to link the extension in static mode.
             Additionally, setting this to `False` means the library will be linked
             against `libnanobind.so`.
+        nanobind_link_mode: str, either "static", "shared", or "auto"
+            Linkage to request for (lib)nanobind. Can either be "static" to link nanobind
+            statically, "shared" to link against `libnanobind.so`, or "auto", which decides
+            linkage based on the value of `linkstatic` (see above).
         local_defines: list
             A list of preprocessor defines to set for this target.
             Augmented with `-DNB_DOMAIN=$DOMAIN` if the domain argument is given.
@@ -83,8 +89,16 @@ def nanobind_extension(
     else:
         NANOBIND_DOMAIN = []
 
-    NANOBIND = NANOBIND_STATIC if linkstatic else NANOBIND_SHARED
-    NB_DYNDEPS = LIBNANOBIND if not linkstatic else []
+    if nanobind_link_mode not in ("static", "shared", "auto"):
+        fail("nanobind_linkage has to be one of 'static', 'shared', or 'auto'")
+
+    if nanobind_link_mode == "auto":
+        nb_linkstatic = linkstatic
+    else:
+        nb_linkstatic = True if nanobind_link_mode == "static" else False
+
+    NANOBIND = NANOBIND_STATIC if nb_linkstatic else NANOBIND_SHARED
+    NB_DYNDEPS = LIBNANOBIND if not nb_linkstatic else []
 
     cc_binary(
         name = name + ".so",
