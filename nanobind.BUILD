@@ -10,6 +10,7 @@ load(
     "maybe_compact_asserts",
     "nb_common_opts",
     "nb_free_threading",
+    "nb_library_linkopts",
     "nb_sizeopts",
     "nb_stripopts",
     "py_limited_api",
@@ -36,15 +37,7 @@ cc_library(
     copts = nb_common_opts(mode = "library") + nb_sizeopts(),
     defines = py_limited_api() + nb_free_threading(),
     includes = ["include"],
-    linkopts = select({
-        "@platforms//os:linux": ["-Wl,--gc-sections"],
-        "@platforms//os:macos": [
-            # chained fixups on Apple platforms.
-            "-Wl,@$(location :cmake/darwin-ld-cpython.sym)",
-            "-Wl,-dead_strip",
-        ],
-        "//conditions:default": [],
-    }) + nb_stripopts(),
+    linkopts = nb_library_linkopts() + nb_stripopts(),
     local_defines = maybe_compact_asserts(),
     textual_hdrs = glob(
         [
@@ -81,15 +74,7 @@ cc_library(
     copts = nb_common_opts(mode = "library") + nb_sizeopts(),
     defines = py_limited_api() + nb_free_threading(),
     includes = ["include"],
-    linkopts = select({
-        "@platforms//os:linux": ["-Wl,--gc-sections"],
-        "@platforms//os:macos": [
-            # chained fixups on Apple platforms.
-            "-Wl,@$(location :cmake/darwin-ld-cpython.sym)",
-            "-Wl,-dead_strip",
-        ],
-        "//conditions:default": [],
-    }) + nb_stripopts(),
+    linkopts = nb_library_linkopts() + nb_stripopts(),
     local_defines = [
         "NB_BUILD=1",
         "NB_SHARED=1",

@@ -64,3 +64,20 @@ def nb_free_threading():
         "@rules_python//python/config_settings:is_py_freethreaded": ["NB_FREE_THREADED"],
         "//conditions:default": [],
     })
+
+def nb_library_linkopts():
+    """A set of options for symbol resolution and dead code removal from built nanobind libraries.
+
+    Aside from the internal implementation detail, these flags should be given when
+    linking `nanobind_extension`s in shared mode, since otherwise the linker will
+    attempt to resolve the libpython symbols in the extension's .o files.
+    """
+    return select({
+        "@platforms//os:linux": ["-Wl,--gc-sections"],
+        "@platforms//os:macos": [
+            # chained fixups on Apple platforms.
+            "-Wl,@$(location :cmake/darwin-ld-cpython.sym)",
+            "-Wl,-dead_strip",
+        ],
+        "//conditions:default": [],
+    })
