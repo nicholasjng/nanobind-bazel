@@ -139,11 +139,47 @@ def nanobind_library(
         name,
         copts = [],
         deps = [],
+        linkstatic = False,
+        nanobind_link_mode = "auto",
         **kwargs):
+    """A static or shared library depending on nanobind.
+
+    Args:
+        name: str
+            A name for this target. This becomes the C++ library name.
+        copts: list
+            A list of compiler optimizations. Augmented with nanobind-specific
+            compiler optimizations by default.
+        deps: list
+            A list of dependencies of this extension.
+        linkstatic: bool
+            Whether to link the extension in static mode.
+            Additionally, setting this to `False` means the library will be linked
+            against a shared version of `@nanobind`.
+        nanobind_link_mode: str, either "static", "shared", or "auto"
+            Linkage to request for (lib)nanobind. Can either be "static" to link nanobind
+            statically, "shared" to link against `libnanobind.so`, or "auto", which decides
+            linkage based on the value of `linkstatic` (see above).
+        **kwargs: Any
+            Keyword arguments matching the `cc_library` rule arguments, to be passed
+            directly to the resulting `cc_library` target.
+    """
+
+    if nanobind_link_mode not in ("static", "shared", "auto"):
+        fail("nanobind_linkage has to be one of 'static', 'shared', or 'auto'")
+
+    if nanobind_link_mode == "auto":
+        nb_linkstatic = linkstatic
+    else:
+        nb_linkstatic = True if nanobind_link_mode == "static" else False
+
+    NANOBIND = NANOBIND_STATIC if nb_linkstatic else NANOBIND_SHARED
+
     cc_library(
         name = name,
         copts = copts + NANOBIND_COPTS,
-        deps = deps + NANOBIND_STATIC,
+        deps = deps + NANOBIND,
+        linkstatic = linkstatic,
         **kwargs
     )
 
