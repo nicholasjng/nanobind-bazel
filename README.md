@@ -21,8 +21,8 @@ nanobind-bazel is published to the Bazel Central Registry (BCR). To use it, spec
 
 ```
 # the version of nanobind-bazel is exactly equal to the version of the internally used nanobind.
-# In this case, we are building bindings with nanobind==2.9.2.
-bazel_dep(name = "nanobind_bazel", version = "2.9.2")
+# In this case, we are building bindings with nanobind==2.10.2.
+bazel_dep(name = "nanobind_bazel", version = "2.10.2")
 ```
 
 To instead use a development version, you can declare a `git_override()` dependency in your MODULE.bazel:
