@@ -360,10 +360,52 @@ def nanobind_test(
         name,
         copts = [],
         deps = [],
+        dynamic_deps = [],
+        linkstatic = False,
+        nanobind_link_mode = "auto",
         **kwargs):
+    """A C++ test depending on nanobind.
+
+    Args:
+        name: str
+            A name for this target. This becomes the Python module name
+            used by the resulting nanobind extension.
+        copts: list
+            A list of compiler optimizations. Augmented with nanobind-specific
+            compiler optimizations by default.
+        deps: list
+            A list of dependencies of this extension.
+        dynamic_deps: list
+            A list of shared library dependencies of the extension.
+            Augmented by `libnanobind.so` if linkstatic is set to `False`, or if
+            `nanobind_link_mode = "shared"`.
+        linkstatic: bool
+            Whether to link the extension in static mode.
+            Additionally, setting this to `False` means the library will be linked
+            against `libnanobind.so`.
+        nanobind_link_mode: str, either "static", "shared", or "auto"
+            Linkage to request for (lib)nanobind. Can either be "static" to link nanobind
+            statically, "shared" to link against `libnanobind.so`, or "auto", which decides
+            linkage based on the value of `linkstatic` (see above).
+        **kwargs: Any
+            Keyword arguments matching the `cc_test` rule arguments, to be passed
+            directly to the resulting `cc_test` target.
+    """
+
+    if nanobind_link_mode not in ("static", "shared", "auto"):
+        fail("nanobind_linkage has to be one of 'static', 'shared', or 'auto'")
+
+    if nanobind_link_mode == "auto":
+        nb_linkstatic = linkstatic
+    else:
+        nb_linkstatic = True if nanobind_link_mode == "static" else False
+
+    NANOBIND = NANOBIND_STATIC if nb_linkstatic else NANOBIND_SHARED
+    NB_DYNDEPS = LIBNANOBIND if not nb_linkstatic else []
     cc_test(
         name = name,
         copts = copts + NANOBIND_COPTS,
-        deps = deps + NANOBIND_STATIC,
+        deps = deps + NANOBIND,
+        dynamic_deps = dynamic_deps + NB_DYNDEPS,
         **kwargs
     )
