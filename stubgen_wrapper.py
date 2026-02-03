@@ -1,4 +1,5 @@
 import os
+import platform
 import sys
 from pathlib import Path
 from typing import Union
@@ -40,6 +41,10 @@ def convert_path_to_module(path: Union[str, os.PathLike]):
         For a shared lib pkg/foo.so, this returns pkg.foo.
     """
     pp = Path(path)
+
+    # on Unix platforms, give the path relative to the runfiles root.
+    if platform.system() != "Windows":
+        pp = pp.relative_to(RLOCATION_ROOT)
     # this trick strips up to two extensions from the file name.
     # Since possible extensions at this point are
     # .so, .abi3.so, and .pyd, this path always gives us the
