@@ -1,38 +1,26 @@
 import os
-import platform
 import sys
 from pathlib import Path
 from typing import Union
 
+from python.runfiles import runfiles
 from stubgen import main
 
-DEBUG = bool(os.getenv("DEBUG"))
 RLOCATION_ROOT = Path("_main")  # the Python path root under the script's runfiles.
 
-
-def get_runfiles_dir(path: Union[str, os.PathLike]):
-    """Obtain the runfiles root from the Python script path."""
-    ppath = Path(path)
-    for p in ppath.parents:
-        if p.parts[-1].endswith("runfiles"):
-            return p
-    raise RuntimeError("could not locate runfiles directory")
+r = runfiles.Create()
 
 
-def get_bindir(path: Union[str, os.PathLike]):
-    """Obtain $(BINDIR) as an absolute path, from the current working directory.
-
-    NB: runfiles are not necessarily in the build tree on Windows,
-    so this needs to be deduced from the CWD of the script.
-    """
-    ppath = Path(path)
+def get_bindir():
+    """Obtain $BINDIR as an absolute path, from the current working directory."""
+    ppath = Path.cwd()
     for p in ppath.parents:
         if p.parts[-1].endswith("bin"):
             return p
     raise RuntimeError("could not locate $(BINDIR)")
 
 
-def convert_path_to_module(path: Union[str, os.PathLike]):
+def convert_path_to_module(path: Union[str, os.PathLike]) -> str:
     """
     Converts a shared object file name to a Python module name
     understood by importlib.
@@ -41,10 +29,6 @@ def convert_path_to_module(path: Union[str, os.PathLike]):
         For a shared lib pkg/foo.so, this returns pkg.foo.
     """
     pp = Path(path)
-
-    # on Unix platforms, give the path relative to the runfiles root.
-    if platform.system() != "Windows":
-        pp = pp.relative_to(RLOCATION_ROOT)
     # this trick strips up to two extensions from the file name.
     # Since possible extensions at this point are
     # .so, .abi3.so, and .pyd, this path always gives us the
@@ -71,58 +55,25 @@ def wrapper():
     Goes through the script's argv, finds the module name(s),
     and converts each of them to a valid Python 3 module name.
     """
-    script, *args = sys.argv
-    runfiles_dir = get_runfiles_dir(script)
-    bindir = get_bindir(os.getcwd())
-    if DEBUG:
-        print(f"runfiles_dir = {runfiles_dir}")
-        print(f"bindir = {bindir}")
-    fname = ""
+    bindir = get_bindir()
+
+    _, *args = sys.argv
     for i, arg in enumerate(args):
-        if arg.startswith("-m"):
-            fname = args.pop(i + 1)
+        if arg in ("-o", "-O", "-M"):
+            # fix up file paths relative to $(BINDIR).
+            args[i + 1] = str(bindir / args[i + 1])
+        elif arg == "-m":
+            fname = args[i + 1]
             if not fname.endswith((".so", ".pyd")):
                 raise ValueError(
                     f"invalid extension file {fname!r}: "
                     "only shared object files with extensions "
                     ".so, .abi3.so, or .pyd are supported"
                 )
-            modname = convert_path_to_module(fname)
-            args.insert(i + 1, modname)
-
-    if "-r" in args:
-        pass
-    elif "-o" not in args:
-        ext_path = runfiles_dir / fname
-        if DEBUG:
-            print(f"ext_path = {ext_path}")
-        if ext_path.is_symlink():
-            # Path.readlink() is available on Python 3.9+ only.
-            objfile = Path(os.readlink(ext_path))
-        else:
-            objfile = bindir / Path(fname).relative_to(RLOCATION_ROOT)
-            if not objfile.exists():
-                raise RuntimeError("could not locate original path to object file")
-
-        stub_outpath = objfile.with_suffix("").with_suffix(".pyi")
-        if DEBUG:
-            print(f"stub_outpath = {stub_outpath}")
-
-        args.extend(["-o", str(stub_outpath)])
-    else:
-        # we have an output file, use its path instead relative to $(BINDIR),
-        # but in absolute form.
-        idx = args.index("-o")
-        args[idx + 1] = str(bindir / args[idx + 1])
-
-    if "-O" in args:
-        idx = args.index("-O")
-        args[idx + 1] = str(bindir / args[idx + 1])
-
-    if "-M" in args:
-        # fix up the path to the marker file relative to $(BINDIR).
-        idx = args.index("-M")
-        args[idx + 1] = str(bindir / args[idx + 1])
+            # the rlocation of the shared lib should always be
+            # relative to bindir.
+            modulepath = Path(r.Rlocation(fname)).relative_to(bindir)
+            args[i + 1] = convert_path_to_module(modulepath)
 
     main(args)
 
