@@ -6,18 +6,7 @@ from typing import Union
 from python.runfiles import runfiles
 from stubgen import main
 
-RLOCATION_ROOT = Path("_main")  # the Python path root under the script's runfiles.
-
 r = runfiles.Create()
-
-
-def get_bindir():
-    """Obtain $BINDIR as an absolute path, from the current working directory."""
-    ppath = Path.cwd()
-    for p in ppath.parents:
-        if p.parts[-1].endswith("bin"):
-            return p
-    raise RuntimeError("could not locate $(BINDIR)")
 
 
 def convert_path_to_module(path: Union[str, os.PathLike]) -> str:
@@ -55,14 +44,9 @@ def wrapper():
     Goes through the script's argv, finds the module name(s),
     and converts each of them to a valid Python 3 module name.
     """
-    bindir = get_bindir()
-
     _, *args = sys.argv
     for i, arg in enumerate(args):
-        if arg in ("-o", "-O", "-M"):
-            # fix up file paths relative to $(BINDIR).
-            args[i + 1] = str(bindir / args[i + 1])
-        elif arg == "-m":
+        if arg == "-m":
             fname = args[i + 1]
             if not fname.endswith((".so", ".pyd")):
                 raise ValueError(
@@ -70,9 +54,11 @@ def wrapper():
                     "only shared object files with extensions "
                     ".so, .abi3.so, or .pyd are supported"
                 )
-            # the rlocation of the shared lib should always be
-            # relative to bindir.
-            modulepath = Path(r.Rlocation(fname)).relative_to(bindir)
+
+            modulepath = Path(r.Rlocation(fname))
+            binloc = modulepath.parts.index("bin")
+            # this gets us the module path relative to bindir.
+            modulepath = Path(*modulepath.parts[binloc + 1 :])
             args[i + 1] = convert_path_to_module(modulepath)
 
     main(args)
