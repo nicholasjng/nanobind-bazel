@@ -8,12 +8,12 @@ and patch the version and integrity parameter of the `http_archive`s below.
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 def _internal_configure_extension_impl(_):
-    nanobind_version = "2.12.0"
+    nanobind_version = "3.0.1"
     http_archive(
         name = "nanobind",
         build_file = "//:nanobind.BUILD",
         strip_prefix = "nanobind-%s" % nanobind_version,
-        integrity = "sha256-AfHwzQOYdDwY8z0HrjatQQvX9KHpBoO1CFBN6JfW5ik=",
+        integrity = "sha256-NN7XzyKS8IqSxFSQoJXnYzSld1G7rgOoyDJBgDvxliM=",
         urls = ["https://github.com/wjakob/nanobind/archive/refs/tags/v%s.tar.gz" % nanobind_version],
     )
 
