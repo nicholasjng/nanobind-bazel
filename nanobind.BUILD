@@ -28,7 +28,10 @@ cc_library(
     name = "nanobind",
     srcs = glob(
         include = ["src/*.cpp"],
-        exclude = ["src/nb_combined.cpp"],
+        exclude = [
+            "src/nb_backend.cpp",
+            "src/nb_combined.cpp",
+        ],
     ),
     additional_linker_inputs = select({
         "@platforms//os:macos": [":cmake/darwin-ld-cpython.sym"],
@@ -59,7 +62,10 @@ cc_library(
     name = "nanobind_shared",
     srcs = glob(
         include = ["src/*.cpp"],
-        exclude = ["src/nb_combined.cpp"],
+        exclude = [
+            "src/nb_backend.cpp",
+            "src/nb_combined.cpp",
+        ],
     ),
     hdrs = glob(
         [
