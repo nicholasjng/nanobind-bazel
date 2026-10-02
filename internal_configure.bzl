@@ -203,12 +203,12 @@ NANOBIND_BACKEND_WHEELS = {
 }
 
 def _internal_configure_extension_impl(_):
-    nanobind_version = "3.0.1"
+    nanobind_version = "3.1.0"
     http_archive(
         name = "nanobind",
         build_file = "//:nanobind.BUILD",
         strip_prefix = "nanobind-%s" % nanobind_version,
-        integrity = "sha256-NN7XzyKS8IqSxFSQoJXnYzSld1G7rgOoyDJBgDvxliM=",
+        integrity = "sha256-OWWYkKES6E5yY+SiY8cd0mIfhm96Q4bOle9BDmwOXC8=",
         urls = ["https://github.com/wjakob/nanobind/archive/refs/tags/v%s.tar.gz" % nanobind_version],
     )
 
