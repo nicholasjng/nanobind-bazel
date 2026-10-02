@@ -56,15 +56,14 @@ def wrapper():
                     ".so, .abi3.so, .abi3t.so, or .pyd are supported"
                 )
 
-            modulepath = Path(r.Rlocation(fname))
-            real_modpath = modulepath.resolve()
-            binloc = modulepath.parts.index("bin")
-            # this gets us the module path relative to bindir.
-            modulepath = Path(*modulepath.parts[binloc + 1 :])
+            rpath = Path(r.Rlocation(fname)).resolve()
+            binloc = rpath.parts.index("bin")
+            bindir = Path(*rpath.parts[: binloc + 1])
+            modulepath = Path(*Path(fname).parts[1:])
             args[i + 1] = convert_path_to_module(modulepath)
             if "-o" not in args and "-O" not in args:
                 modname = modulepath.with_suffix("").stem
-                stub_out = str(real_modpath.with_name(modname + ".pyi"))
+                stub_out = str((bindir / modulepath).with_name(modname + ".pyi"))
 
     if stub_out is not None:
         args.extend(["-o", stub_out])
