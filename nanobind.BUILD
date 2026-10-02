@@ -26,19 +26,28 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "nanobind",
-    srcs = glob(
-        include = ["src/*.cpp"],
-        exclude = [
-            "src/nb_backend.cpp",
-            "src/nb_combined.cpp",
-        ],
-    ),
+    srcs = select({
+        "@nanobind_bazel//:with_split_mode": [],
+        "//conditions:default": glob(
+            include = ["src/*.cpp"],
+            exclude = [
+                "src/nb_backend.cpp",
+                "src/nb_combined.cpp",
+            ],
+        ),
+    }),
     additional_linker_inputs = select({
         "@platforms//os:macos": [":cmake/darwin-ld-cpython.sym"],
         "//conditions:default": [],
     }),
     copts = nb_common_opts(mode = "library") + nb_sizeopts(),
-    defines = py_limited_api() + nb_free_threading(),
+    defines = py_limited_api() + nb_free_threading() + select({
+        "@nanobind_bazel//:with_split_mode": [
+            "NB_BACKEND_MODULE=nanobind_backend",
+            "NB_BACKEND_PYPI=nanobind-backend",
+        ],
+        "//conditions:default": [],
+    }),
     includes = ["include"],
     linkopts = nb_library_linkopts() + nb_stripopts(),
     local_defines = maybe_compact_asserts(),
@@ -48,9 +57,12 @@ cc_library(
             "src/*.h",
         ],
     ),
-    deps = ["@robin-map//:robin-map"] + select(
+    deps = select({
+        "@nanobind_bazel//:with_split_mode": [],
+        "//conditions:default": ["@robin-map//:robin-map"],
+    }) + select(
         {
-            "@nanobind_bazel//:stable-abi": [
+            "@nanobind_bazel//:any-stable-abi": [
                 "@rules_python//python/cc:current_py_cc_headers_abi3" if getattr(features, "headers_abi3", False) else "@rules_python//python/cc:current_py_cc_headers",
             ],
             "//conditions:default": ["@rules_python//python/cc:current_py_cc_headers"],
