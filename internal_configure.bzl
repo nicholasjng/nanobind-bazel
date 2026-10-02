@@ -202,7 +202,7 @@ NANOBIND_BACKEND_WHEELS = {
     ),
 }
 
-def _internal_configure_extension_impl(_):
+def _internal_configure_extension_impl(module_ctx):
     nanobind_version = "3.1.0"
     http_archive(
         name = "nanobind",
@@ -229,5 +229,7 @@ def _internal_configure_extension_impl(_):
             type = "zip",
             urls = [url],
         )
+
+    return module_ctx.extension_metadata(reproducible = True)
 
 internal_configure_extension = module_extension(implementation = _internal_configure_extension_impl)
