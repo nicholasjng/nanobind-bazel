@@ -43,9 +43,13 @@ def maybe_compact_asserts():
 # Define the Python version hex if stable ABI builds are requested.
 def py_limited_api():
     return select({
+        "@nanobind_bazel//:cp310": ["Py_LIMITED_API=0x030A0000"],
+        "@nanobind_bazel//:cp311": ["Py_LIMITED_API=0x030B0000"],
         "@nanobind_bazel//:cp312": ["Py_LIMITED_API=0x030C0000"],
         "@nanobind_bazel//:cp313": ["Py_LIMITED_API=0x030D0000"],
         "@nanobind_bazel//:cp314": ["Py_LIMITED_API=0x030E0000"],
+        "@nanobind_bazel//:cp315": ["Py_LIMITED_API=0x030F0000"],
+        "@nanobind_bazel//:cp315t": ["Py_LIMITED_API=0x030F0000"],
         "@nanobind_bazel//:pyunlimitedapi": [],
     })
 
@@ -54,6 +58,7 @@ def py_limited_api():
 def extension_name(name):
     return select({
         Label("@platforms//os:windows"): name + ".pyd",
+        "@nanobind_bazel//:stable-abi-ft-unix": name + ".abi3t.so",
         "@nanobind_bazel//:stable-abi-unix": name + ".abi3.so",
         "@nanobind_bazel//:unstable-abi-unix": name + ".so",
     })

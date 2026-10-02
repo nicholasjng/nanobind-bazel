@@ -46,8 +46,10 @@ def nanobind_extension(
     1. $NAME.so, a shared object library for use on Linux/Mac.
     2. $NAME.abi3.so, a copy of $NAME.so for Linux/Mac,
         indicating that it is compatible with the Python stable ABI.
-    3. $NAME.pyd, a copy of $NAME.so for use on Windows.
-    4. $NAME, an alias pointing to the appropriate library
+    3. $NAME.abi3t.so, a copy of $NAME.so for Linux/Mac,
+        indicating that it is compatible with the free-threaded Python stable ABI (PEP 803).
+    4. $NAME.pyd, a copy of $NAME.so for use on Windows.
+    5. $NAME, an alias pointing to the appropriate library
         depending on the target platform.
 
     Args:
@@ -116,6 +118,14 @@ def nanobind_extension(
         name = name + "_copy_so_to_abi3_so",
         src = name + ".so",
         out = name + ".abi3.so",
+        testonly = kwargs.get("testonly"),
+        visibility = kwargs.get("visibility"),
+    )
+
+    copy_file(
+        name = name + "_copy_so_to_abi3t_so",
+        src = name + ".so",
+        out = name + ".abi3t.so",
         testonly = kwargs.get("testonly"),
         visibility = kwargs.get("visibility"),
     )
@@ -303,7 +313,10 @@ def nanobind_stubgen(
         Label("@nanobind//:stubgen"),
         Label("@pypi__typing_extensions//:lib"),
         Label("@rules_python//python/runfiles"),
-    ]
+    ] + select({
+        "@nanobind_bazel//:with_split_mode": [Label("@nanobind_bazel//:nanobind_backend")],
+        "//conditions:default": [],
+    })
 
     data = [module]
 

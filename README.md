@@ -46,6 +46,14 @@ local_path_override(
 )
 ```
 
+## Build settings
+
+`nanobind-bazel` exposes the following build flags:
+
+- `--@nanobind_bazel//:py-limited-api`: Target a Python stable ABI version (`cp310`, `cp311`, `cp312`, `cp313`, `cp314`, `cp315`), the PEP 803 provisional free-threaded stable ABI (`cp315t`), or `unset` (the default). On Linux and macOS, setting `cp310`–`cp315` produces `.abi3.so` extensions, while setting `cp315t` produces `.abi3t.so` extensions. Note that standard nanobind builds require `cp312` or newer for `abi3`, whereas split-mode builds (`--@nanobind_bazel//:split-mode=True`) support `cp310` and newer.
+- `--@nanobind_bazel//:split-mode`: Boolean flag (`True` or `False`, default `False`). When enabled (`nanobind>=3.0.0`), builds extensions in [nanobind split mode](https://nanobind.readthedocs.io/en/latest/split_mode.html), delegating the nanobind runtime to the external `nanobind-backend` PyPI package instead of statically linking it into the extension. `py_library` or `py_test` targets that import a split-mode extension in Bazel can depend on `@nanobind_bazel//:nanobind_backend`.
+- `--@nanobind_bazel//:minsize`: Boolean flag (`True` or `False`, default `True`) controlling whether size optimizations (`-Os` / `/Os`) are applied.
+
 ## Bazel versions
 
 This library relies on the ability to pass inputs to the linker in `cc_library` targets, which became available starting in Bazel 6.4.0.
