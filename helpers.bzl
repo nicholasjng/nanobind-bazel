@@ -66,7 +66,10 @@ def extension_name(name):
 # Optionally add a define for free-threaded nanobind builds.
 def nb_free_threading():
     return select({
-        "@rules_python//python/config_settings:is_py_freethreaded": ["NB_FREE_THREADED"],
+        "@rules_python//python/config_settings:is_py_freethreaded": [
+            "NB_FREE_THREADED",
+            "Py_GIL_DISABLED=1",
+        ],
         "//conditions:default": [],
     })
 
