@@ -3,10 +3,7 @@ import sys
 from pathlib import Path
 from typing import Union
 
-from python.runfiles import runfiles
 from stubgen import main
-
-r = runfiles.Create()
 
 
 def convert_path_to_module(path: Union[str, os.PathLike]) -> str:
@@ -56,14 +53,17 @@ def wrapper():
                     ".so, .abi3.so, .abi3t.so, or .pyd are supported"
                 )
 
-            rpath = Path(r.Rlocation(fname)).resolve()
-            binloc = rpath.parts.index("bin")
-            bindir = Path(*rpath.parts[: binloc + 1])
-            modulepath = Path(*Path(fname).parts[1:])
-            args[i + 1] = convert_path_to_module(modulepath)
+
+            modulepath = Path(fname)
+            modulename = modulepath.with_suffix("").stem # Get the name of the module
+            args[i + 1] = modulename
+
+            # Add the path to the runfiles directory to the PYTHONPATH, so we can import it directly
+            sys.path.insert(0, modulepath.parent.as_posix())
+
             if "-o" not in args and "-O" not in args:
                 modname = modulepath.with_suffix("").stem
-                stub_out = str((bindir / modulepath).with_name(modname + ".pyi"))
+                stub_out = str((modulepath).with_name(modname + ".pyi"))
 
     if stub_out is not None:
         args.extend(["-o", stub_out])

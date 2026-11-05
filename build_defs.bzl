@@ -23,6 +23,7 @@ load(
 load("@rules_cc//cc:cc_shared_library.bzl", "cc_shared_library")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 load("@rules_python//python:py_binary.bzl", "py_binary")
+load("@bazel_lib//lib:run_binary.bzl", "run_binary")
 
 NANOBIND_COPTS = nb_common_opts() + nb_sizeopts()
 NANOBIND_STATIC = [Label("@nanobind//:nanobind")]
@@ -257,15 +258,14 @@ def nanobind_stubgen(
         name,
         module,
         output_file = None,
-        output_directory = None,
         imports = [],
+        data = [],
         pattern_file = None,
         marker_file = None,
         include_private_members = False,
         exclude_docstrings = False,
         exclude_values = False,
-        quiet = False,
-        recursive = False):
+        quiet = False):
     """Creates a stub file containing Python type annotations for a nanobind extension.
 
     Args:
@@ -278,12 +278,10 @@ def nanobind_stubgen(
             Output file path for the generated stub, relative to $(BINDIR).
             If none is given, the stub will be placed under the same location
             as the module in your source tree.
-        output_directory: str or None
-            Output directory for the generated stub, relative to $(BINDIR).
-            If none is given, the stub will be placed under the same location
-            as the module in your source tree.
         imports: list
             List of modules to import for stub generation.
+        data: list
+            List of data dependencies for stub generation.
         pattern_file: Label or None
             Label of a pattern file used for programmatically editing generated stubs.
             For more information, consider the documentation under
@@ -301,54 +299,37 @@ def nanobind_stubgen(
             Whether to replace all constants with a Python ellipsis placeholder.
         quiet: bool
             Whether to suppress output of the stubgen script.
-        recursive: bool
-            Whether to perform stub generation on submodules as well.
     """
     STUBGEN_WRAPPER = Label("@nanobind_bazel//:stubgen_wrapper.py")
-    loc = "$(rlocationpath {})"
+    loc = "$(execpath {})"
+    bin_name = "_{}_bin".format(name)
 
     # stubgen wrapper dependencies: nanobind.stubgen, typing_extensions (via nanobind),
     # rules_python runfiles (unused, needed later when giving an explicit output path)
     deps = [
         Label("@nanobind//:stubgen"),
         Label("@pypi__typing_extensions//:lib"),
-        Label("@rules_python//python/runfiles"),
     ] + select({
         "@nanobind_bazel//:with_split_mode": [Label("@nanobind_bazel//:nanobind_backend")],
         "//conditions:default": [],
     })
 
-    data = [module]
-
-    args = ["-m " + loc.format(module)]
-
-    if recursive and output_file:
-        fail("Cannot specify an output file if recursive stubgen is requested")
-
-    if recursive and not output_directory:
-        fail("Must specify an output directory for recursive stubgen")
-
-    if recursive:
-        args.append("-r")
-
-    if output_directory:
-        args.append("-O {}".format(output_directory))
+    args = ["-m ", loc.format(module)]
 
     # to be searchable by path expansion, a file must be
     # declared by a rule beforehand. This might not be the
     # case for a generated stub, so we just give the raw name here
     if output_file:
-        args.append("-o {}".format(output_file))
+        args.extend(["-o", loc.format(output_file)])
 
     # Add pattern and marker files.
     # The pattern file must exist in the Bazel repo, so
     # we pass its label to the py_binary's data dependencies.
     # The marker file can be generated on the fly, however.
     if pattern_file:
-        data.append(pattern_file)
-        args.append("-p " + loc.format(pattern_file))
+        args.extend(["-p", loc.format(pattern_file)])
     if marker_file:
-        args.append("-M {}".format(marker_file))
+        args.extend(["-M", loc.format(marker_file)])
 
     if include_private_members:
         args.append("--include-private")
@@ -359,14 +340,31 @@ def nanobind_stubgen(
     if quiet:
         args.append("-q")
 
+    outs = []
+    out_dirs = []
+    if output_file:
+        outs.append(output_file)
+    else:
+        outs.append("{}.pyi".format(Label(module).name))
+    if marker_file:
+        outs.append(marker_file)
+
     py_binary(
-        name = name,
+        name = bin_name,
         srcs = [STUBGEN_WRAPPER],
         main = STUBGEN_WRAPPER,
         deps = deps,
         data = data,
         imports = imports,
+    )
+
+    run_binary(
+        name = name,
+        outs = outs,
+        out_dirs = out_dirs,
+        srcs = [module] + ([pattern_file] if pattern_file else []),
         args = args,
+        tool = ":{}".format(bin_name),
     )
 
 def nanobind_test(
