@@ -13,6 +13,7 @@ built using the C++ source files containing the nanobind module definition,
 which can then be included e.g. as a `data` input in a ``py_library``.
 """
 
+load("@bazel_lib//lib:run_binary.bzl", "run_binary")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load(
     "@nanobind_bazel//:helpers.bzl",
@@ -23,7 +24,6 @@ load(
 load("@rules_cc//cc:cc_shared_library.bzl", "cc_shared_library")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 load("@rules_python//python:py_binary.bzl", "py_binary")
-load("@bazel_lib//lib:run_binary.bzl", "run_binary")
 
 NANOBIND_COPTS = nb_common_opts() + nb_sizeopts()
 NANOBIND_STATIC = [Label("@nanobind//:nanobind")]
