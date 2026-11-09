@@ -341,7 +341,6 @@ def nanobind_stubgen(
         args.append("-q")
 
     outs = []
-    out_dirs = []
     if output_file:
         outs.append(output_file)
     else:
@@ -361,7 +360,6 @@ def nanobind_stubgen(
     run_binary(
         name = name,
         outs = outs,
-        out_dirs = out_dirs,
         srcs = [module] + ([pattern_file] if pattern_file else []),
         args = args,
         tool = ":{}".format(bin_name),
