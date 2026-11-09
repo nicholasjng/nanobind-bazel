@@ -6,24 +6,6 @@ from typing import Union
 from stubgen import main
 
 
-def convert_path_to_module(path: Union[str, os.PathLike]) -> str:
-    """
-    Converts a shared object file name to a Python module name
-    understood by importlib.
-
-    Example:
-        For a shared lib pkg/foo.so, this returns pkg.foo.
-    """
-    pp = Path(path)
-    # this trick strips up to two extensions from the file name.
-    # Since possible extensions at this point are
-    # .so, .abi3.so, and .pyd, this path always gives us the
-    # name of the shared lib without any extension.
-    extless = pp.with_name(pp.with_suffix("").stem)
-    # TODO: Normalize to snakecase
-    return ".".join(extless.parts)
-
-
 def wrapper():
     """
     A small wrapper to convert nanobind extension targets to module names
